@@ -2,4 +2,5 @@ config.php
 /.htaccess
 /socket.php
 /time_tracking/upload/
+/uploads/
 /test.php
