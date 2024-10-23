@@ -36,6 +36,26 @@ if( !$_GET["date_to"] ) {
 		</div>
 
 		<div class="nowrap" style="display: inline-block; margin-bottom: 10px; margin-right: 30px;">
+			<span>Участок:</span>
+			<select name="F_ID" class="<?=$_GET["F_ID"] ? "filtered" : ""?>">
+				<option value=""></option>
+				<?php
+				$query = "
+					SELECT F_ID
+						,f_name
+					FROM factory
+					ORDER BY F_ID
+				";
+				$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+				while( $row = mysqli_fetch_array($res) ) {
+					$selected = ($row["F_ID"] == $_GET["F_ID"]) ? "selected" : "";
+					echo "<option value='{$row["F_ID"]}' {$selected}>{$row["f_name"]}</option>";
+				}
+				?>
+			</select>
+		</div>
+
+		<div class="nowrap" style="display: inline-block; margin-bottom: 10px; margin-right: 30px;">
 			<span>Код:</span>
 			<select name="CWP_ID" class="<?=$_GET["CWP_ID"] ? "filtered" : ""?>" style="width: 200px;">
 				<option value=""></option>
@@ -134,7 +154,8 @@ foreach ($_GET as &$value) {
 	<thead>
 		<tr>
 			<th>Дата</th>
-			<th>Комплект противовесов</th>
+			<th>Участок</th>
+			<th>Наименование продукции</th>
 			<th>Поддон</th>
 			<th>Паллетов</th>
 			<th>Деталей в паллете</th>
@@ -160,6 +181,7 @@ $query = "
 		".($_GET["CWP_ID"] ? "AND LS.CWP_ID={$_GET["CWP_ID"]}" : "")."
 		".($_GET["CB_ID"] ? "AND CWP.CB_ID = {$_GET["CB_ID"]}" : "")."
 		".($_GET["product"] ? "AND CWP.product LIKE '{$_GET["product"]}'" : "")."
+		".($_GET["F_ID"] ? "AND LS.F_ID = {$_GET["F_ID"]}" : "")."
 	GROUP BY LS.ls_date
 	ORDER BY LS.ls_date, LS.CWP_ID
 ";
@@ -170,6 +192,7 @@ while( $row = mysqli_fetch_array($res) ) {
 	$query = "
 		SELECT LS.LS_ID
 			,LS.ls_date
+			,F.f_name
 			,CONCAT(IFNULL(CW.item, CWP.cwp_name), ' (', CWP.in_pallet, 'шт)') item
 			,LS.CWP_ID
 			,LS.pallets
@@ -177,6 +200,7 @@ while( $row = mysqli_fetch_array($res) ) {
 			,LS.pallets * LS.in_pallet details
 			,PN.pallet_name
 		FROM list__Shipment LS
+		JOIN factory F ON F.F_ID = LS.F_ID
 		JOIN pallet__Name PN ON PN.PN_ID = LS.PN_ID
 		JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LS.CWP_ID
 		LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
@@ -185,6 +209,7 @@ while( $row = mysqli_fetch_array($res) ) {
 			".($_GET["CWP_ID"] ? "AND LS.CWP_ID={$_GET["CWP_ID"]}" : "")."
 			".($_GET["CB_ID"] ? "AND CWP.CB_ID = {$_GET["CB_ID"]}" : "")."
 			".($_GET["product"] ? "AND CWP.product LIKE '{$_GET["product"]}'" : "")."
+			".($_GET["F_ID"] ? "AND LS.F_ID = {$_GET["F_ID"]}" : "")."
 		ORDER BY LS.ls_date DESC, LS.CWP_ID
 	";
 	$subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
@@ -204,6 +229,7 @@ while( $row = mysqli_fetch_array($res) ) {
 		}
 
 		?>
+			<td><?=$subrow["f_name"]?></td>
 			<td><?=$subrow["item"]?></td>
 			<td><?=$subrow["pallet_name"]?></td>
 			<td><?=$subrow["pallets"]?></td>
@@ -219,6 +245,7 @@ while( $row = mysqli_fetch_array($res) ) {
 ?>
 		<tr class="summary">
 			<td></td>
+			<td></td>
 			<td>Итог:</td>
 			<td><?=$row["pallets"]?></td>
 			<td></td>
@@ -229,6 +256,7 @@ while( $row = mysqli_fetch_array($res) ) {
 }
 ?>
 		<tr class="total">
+			<td></td>
 			<td></td>
 			<td></td>
 			<td>Итог:</td>
