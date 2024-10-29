@@ -95,11 +95,11 @@ if( isset($_GET["download"]) ) {
 //Удаляем неотгруженные регистрации старше 3-х месяцев
 $query = "
 	UPDATE list__PackingPallet
-	SET removal_time = CURDATE()
+	SET removal_time = NOW()
 	WHERE F_ID = {$_GET["F_ID"]}
 		AND scan_time IS NULL
 		AND shipment_time IS NULL
-		AND packed_time < CURDATE() - INTERVAL 3 month
+		AND packed_time < NOW() - INTERVAL 3 month
 ";
 mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 
