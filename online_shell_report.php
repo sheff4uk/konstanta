@@ -79,7 +79,7 @@ if( !$_GET["date_to"] ) {
 						<option value=""></option>
 						<?php
 						$query = "
-							SELECT CW.CW_ID, CW.item
+							SELECT CW.CW_ID, CW.drawing_item
 							FROM CounterWeight CW
 							JOIN CounterWeightPallet CWP ON CWP.CW_ID = CW.CW_ID AND CWP.CB_ID = 2
 							ORDER BY CW.CW_ID
@@ -87,7 +87,7 @@ if( !$_GET["date_to"] ) {
 						$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 						while( $row = mysqli_fetch_array($res) ) {
 							$selected = ($row["CW_ID"] == $_GET["CW_ID"]) ? "selected" : "";
-							echo "<option value='{$row["CW_ID"]}' {$selected}>{$row["item"]}</option>";
+							echo "<option value='{$row["CW_ID"]}' {$selected}>{$row["drawing_item"]}</option>";
 						}
 						?>
 					</select>
@@ -132,7 +132,7 @@ if( !$_GET["date_to"] ) {
 $query = "
 	SELECT 'A' type
 		,DATE_FORMAT(SA.sa_date, '%d/%m/%Y') date_format
-		,CW.item
+		,CW.drawing_item
 		,SA.sa_cnt
 		,SA.actual_volume
 		,CW.drawing_volume
@@ -154,7 +154,7 @@ $query = "
 
 	SELECT 'R' type
 		,DATE_FORMAT(SR.sr_date, '%d/%m/%Y') date_format
-		,CW.item
+		,CW.drawing_item
 		,NULL
 		,NULL
 		,NULL
@@ -185,7 +185,7 @@ while( $row = mysqli_fetch_array($res) ) {
 	?>
 	<tr>
 		<td><?=$row["date_format"]?></td>
-		<td><?=$row["item"]?></td>
+		<td><?=$row["drawing_item"]?></td>
 		<td><b style="color: green;"><?=$row["sa_cnt"]?></b></td>
 		<td><?=($row["actual_volume"] ? $row["actual_volume"]/1000 : "")?></td>
 		<td><?=($row["drawing_volume"] ? $row["drawing_volume"]/1000 : "")?></td>
