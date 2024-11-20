@@ -289,8 +289,8 @@ while( $row = mysqli_fetch_array($res) ) {
 			<tr>
 				<th>Противовес</th>
 				<th>Кол-во годных форм</th>
-				<th>Средний ресурс формы до её списания в циклах заливки</th>
-				<th>Среднесуточное списание форм</th>
+				<th>Средний ресурс формы до её списания в циклах заливки<br>(год | квартал | месяц)</th>
+				<th>Среднесуточное списание форм<br>(год | квартал | месяц)</th>
 				<th>Списаний за прошедшие сутки</th>
 				<th>Текущая потребность в формах</th>
 				<th>Дефицит форм в штуках</th>
@@ -302,8 +302,12 @@ while( $row = mysqli_fetch_array($res) ) {
 			$query = "
 				SELECT CW.item
 					,CW.shell_balance
-					,ROUND((WB.fillings * PB.in_cassette) / WR.sr_cnt) `durability`
-					,ROUND(WR.sr_cnt / DATEDIFF(CURDATE() - INTERVAL 1 DAY, '2020-12-04'), 1) `sr_avg`
+					,ROUND((WBY.shell_fillings) / WRY.shell_reject) `durability_year`
+					,ROUND((WBQ.shell_fillings) / WRQ.shell_reject) `durability_quarter`
+					,ROUND((WBM.shell_fillings) / WRM.shell_reject) `durability_month`
+					,ROUND(WRY.shell_reject / DATEDIFF(CURDATE(), CURDATE() - INTERVAL 1 YEAR), 1) `sr_avg_year`
+					,ROUND(WRQ.shell_reject / DATEDIFF(CURDATE(), CURDATE() - INTERVAL 3 MONTH), 1) `sr_avg_quarter`
+					,ROUND(WRM.shell_reject / DATEDIFF(CURDATE(), CURDATE() - INTERVAL 1 MONTH), 1) `sr_avg_month`
 					#,ROUND(AVG(PB.fact_batches * PB.fillings / PB.per_batch * PB.in_cassette)) `often`
 					#,MAX(ROUND(PB.fact_batches * PB.fillings / PB.per_batch) * PB.in_cassette) `max`
 					,(
@@ -326,26 +330,60 @@ while( $row = mysqli_fetch_array($res) ) {
 					GROUP BY CW_ID
 				) SR ON SR.CW_ID = CW.CW_ID
 				LEFT JOIN plan__Batch PB ON PB.CW_ID = CW.CW_ID
-				# Число заливок с 04.12.2020
+				# Число заливок за год
 				LEFT JOIN (
 					SELECT PB.CW_ID
-						,SUM(1) fillings
+						,SUM(PB.in_cassette) shell_fillings
 					FROM list__Filling LF
 					JOIN list__Batch LB ON LB.LB_ID = LF.LB_ID
 					JOIN plan__Batch PB ON PB.PB_ID = LB.PB_ID
-					#WHERE DATE(LF.filling_time) BETWEEN '2020-12-04' AND CURDATE() - INTERVAL 1 DAY
-					WHERE DATE(LF.filling_time) BETWEEN CURDATE() - INTERVAL 6 MONTH AND CURDATE() - INTERVAL 1 DAY
+					WHERE DATE(LF.filling_time) >= CURDATE() - INTERVAL 1 YEAR
 					GROUP BY PB.CW_ID
-				) WB ON WB.CW_ID = CW.CW_ID
-				# Число списаний с 04.12.2020
+				) WBY ON WBY.CW_ID = CW.CW_ID
+				# Число списаний за год
 				LEFT JOIN (
 					SELECT CW_ID
-						,SUM(sr_cnt) sr_cnt
+						,SUM(sr_cnt) shell_reject
 					FROM shell__Reject
-					#WHERE sr_date BETWEEN '2020-12-04' AND CURDATE() - INTERVAL 1 DAY
-					WHERE sr_date BETWEEN CURDATE() - INTERVAL 6 MONTH AND CURDATE() - INTERVAL 1 DAY
+					WHERE sr_date >= CURDATE() - INTERVAL 1 YEAR
 					GROUP BY CW_ID
-				) WR ON WR.CW_ID = CW.CW_ID
+				) WRY ON WRY.CW_ID = CW.CW_ID
+				# Число заливок за квартал
+				LEFT JOIN (
+					SELECT PB.CW_ID
+						,SUM(PB.in_cassette) shell_fillings
+					FROM list__Filling LF
+					JOIN list__Batch LB ON LB.LB_ID = LF.LB_ID
+					JOIN plan__Batch PB ON PB.PB_ID = LB.PB_ID
+					WHERE DATE(LF.filling_time) >= CURDATE() - INTERVAL 3 MONTH
+					GROUP BY PB.CW_ID
+				) WBQ ON WBQ.CW_ID = CW.CW_ID
+				# Число списаний за квартал
+				LEFT JOIN (
+					SELECT CW_ID
+						,SUM(sr_cnt) shell_reject
+					FROM shell__Reject
+					WHERE sr_date >= CURDATE() - INTERVAL 3 MONTH
+					GROUP BY CW_ID
+				) WRQ ON WRQ.CW_ID = CW.CW_ID
+				# Число заливок за месяц
+				LEFT JOIN (
+					SELECT PB.CW_ID
+						,SUM(PB.in_cassette) shell_fillings
+					FROM list__Filling LF
+					JOIN list__Batch LB ON LB.LB_ID = LF.LB_ID
+					JOIN plan__Batch PB ON PB.PB_ID = LB.PB_ID
+					WHERE DATE(LF.filling_time) >= CURDATE() - INTERVAL 1 MONTH
+					GROUP BY PB.CW_ID
+				) WBM ON WBM.CW_ID = CW.CW_ID
+				# Число списаний за месяц
+				LEFT JOIN (
+					SELECT CW_ID
+						,SUM(sr_cnt) shell_reject
+					FROM shell__Reject
+					WHERE sr_date >= CURDATE() - INTERVAL 1 MONTH
+					GROUP BY CW_ID
+				) WRM ON WRM.CW_ID = CW.CW_ID
 				WHERE 1
 					".($_GET["CW_ID"] ? "AND CW.CW_ID={$_GET["CW_ID"]}" : "")."
 					".($_GET["CB_ID"] ? "AND CW.CB_ID = {$_GET["CB_ID"]}" : "")."
@@ -361,8 +399,8 @@ while( $row = mysqli_fetch_array($res) ) {
 					<tr>
 						<td style="text-align: center;"><?=$row["item"]?></td>
 						<td style="text-align: center;"><?=$row["shell_balance"]?></td>
-						<td style="text-align: center;"><?=$row["durability"]?></td>
-						<td style="text-align: center;"><?=$row["sr_avg"]?></td>
+						<td style="text-align: center;"><?=$row["durability_year"]?> | <?=$row["durability_quarter"]?> | <?=$row["durability_month"]?></td>
+						<td style="text-align: center;"><?=$row["sr_avg_year"]?> | <?=$row["sr_avg_quarter"]?> | <?=$row["sr_avg_month"]?></td>
 						<td style="text-align: center;"><?=$row["sr_cnt"]?></td>
 <!--
 						<td style="text-align: center; <?=($row["often"] > $row["shell_balance"] ? "color: red;" : "")?>"><?=$row["often"]?></td>
