@@ -334,7 +334,7 @@ while( $row = mysqli_fetch_array($res) ) {
 					JOIN list__Batch LB ON LB.LB_ID = LF.LB_ID
 					JOIN plan__Batch PB ON PB.PB_ID = LB.PB_ID
 					#WHERE DATE(LF.filling_time) BETWEEN '2020-12-04' AND CURDATE() - INTERVAL 1 DAY
-					WHERE DATE(LF.filling_time) BETWEEN CURDATE() - INTERVAL 1 YEAR AND CURDATE() - INTERVAL 1 DAY
+					WHERE DATE(LF.filling_time) BETWEEN CURDATE() - INTERVAL 6 MONTH AND CURDATE() - INTERVAL 1 DAY
 					GROUP BY PB.CW_ID
 				) WB ON WB.CW_ID = CW.CW_ID
 				# Число списаний с 04.12.2020
@@ -343,7 +343,7 @@ while( $row = mysqli_fetch_array($res) ) {
 						,SUM(sr_cnt) sr_cnt
 					FROM shell__Reject
 					#WHERE sr_date BETWEEN '2020-12-04' AND CURDATE() - INTERVAL 1 DAY
-					WHERE sr_date BETWEEN CURDATE() - INTERVAL 1 YEAR AND CURDATE() - INTERVAL 1 DAY
+					WHERE sr_date BETWEEN CURDATE() - INTERVAL 6 MONTH AND CURDATE() - INTERVAL 1 DAY
 					GROUP BY CW_ID
 				) WR ON WR.CW_ID = CW.CW_ID
 				WHERE 1
