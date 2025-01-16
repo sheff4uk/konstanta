@@ -242,6 +242,8 @@ while( $row = mysqli_fetch_array($res) ) {
 <!--Конец формы-->
 <script>
 	$(function() {
+		$('.wt_act').button();
+
 		$('.weighting_terminal_edit').click( function() {
 			var f_name = $(this).attr("f_name"),
 				post = $(this).attr("post"),
@@ -252,8 +254,13 @@ while( $row = mysqli_fetch_array($res) ) {
 			$('#weighting_terminal_edit_form #f_name').text(f_name);
 			$('#weighting_terminal_edit_form #post').text(post);
 			$('#weighting_terminal_edit_form #WT_ID').text(WT_ID);
-			$('#weighting_terminal_edit_form #wt_act').prop('checked',act);
-			$('.wt_act').button();
+			if( act == "1" ) {
+				$('#weighting_terminal_edit_form #wt_act').prop("checked",true);
+			}
+			else {
+			 	$('#weighting_terminal_edit_form #wt_act').prop("checked",false);
+			}
+			$('.wt_act').button("refresh");
 
 			$('#weighting_terminal_edit_form').dialog({
 				resizable: false,
