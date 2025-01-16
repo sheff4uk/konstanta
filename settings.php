@@ -53,7 +53,7 @@ if( !in_array('settings', $Rights) ) {
 
 <!--Таблица с временем выдержки противовесов-->
 <h1>Время выдержки противовесов:</h1>
-<table class="main_table">
+<table style="width: 100%; table-layout: fixed;">
 	<thead>
 		<tr>
 			<th>Заказчик</th>
@@ -147,7 +147,7 @@ while( $row = mysqli_fetch_array($res) ) {
 
 <!--Таблица с весовыми терминалами-->
 <h1>Весовые терминалы:</h1>
-<table class="main_table">
+<table style="width: 100%; table-layout: fixed;">
 	<thead>
 		<tr>
 			<th>Участок</th>
