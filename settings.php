@@ -24,7 +24,7 @@ if( isset($_POST["CB_ID"]) ) {
 //Редактирование статуса сбора данных с весов
 if( isset($_POST["WT_ID"]) ) {
     session_start();
-    $act = ($_POST["act"] > 0) ? "1" : "0";
+    $act = (isset($_POST["act"])) ? "1" : "0";
 	$query = "
 		UPDATE WeighingTerminal
 		SET act = {$act}
