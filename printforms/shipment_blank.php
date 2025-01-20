@@ -54,16 +54,25 @@ echo "<title>Накладная №{$PS_ID}</title>";
 <?php
     // Получаем дату планируемой отгрузки
     $query = "
-        SELECT DATE_FORMAT(PS.ps_date, '%d.%m.%Y') ps_date_format
+        SET lc_time_names = 'ru_RU';
+    ";
+    mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+    $query = "
+        SELECT DATE_FORMAT(PS.ps_date, '%e %M %Y') ps_date_format
             ,IFNULL(PS.prior, (SELECT IFNULL(MAX(prior), 0) FROM plan__Shipment WHERE F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NOT NULL)
             + (SELECT IFNULL(SUM(1), 0) FROM plan__Shipment WHERE PS_ID <= PS.PS_ID AND F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NULL)) priority
+            ,F.job_title_1
+            ,F.full_name_1
         FROM plan__Shipment PS
+        JOIN factory F ON F.F_ID = PS.F_ID
         WHERE PS.PS_ID = {$PS_ID}
     ";
     $res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 	$row = mysqli_fetch_array($res);
     $ps_date_format = $row["ps_date_format"];
     $priority = $row["priority"];
+    $job_title_1 = $row["job_title_1"];
+    $full_name_1 = $row["full_name_1"];
 
     // Цикл по списку грузоотправителей
     $query = "
@@ -83,6 +92,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
         // Узнаем грузополучателя
         $query = "
             SELECT CB.company
+                ,CB.CB_ID
             FROM plan__ShipmentCWP PSC
             JOIN CounterWeightPallet CWP ON CWP.CWP_ID = PSC.CWP_ID
                 AND CWP.M_ID = {$M_ID}
@@ -93,6 +103,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
         $subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
         $subrow = mysqli_fetch_array($subres);
         $CB_company = $subrow["company"];
+        $CB_ID = $subrow["CB_ID"];
  
         // Статические данные
         $statics = "
@@ -126,6 +137,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
         ";
         $subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
         $i = 1;
+        $quantity = 0;
         while( $subrow = mysqli_fetch_array($subres) ) {
             $statics .= "
                 <tr>
@@ -138,6 +150,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
                 </tr>\n
             ";
             $i++;
+            $quantity += $subrow["quantity"];
         }
 
         // Дополнение пустыми строками  
@@ -186,6 +199,79 @@ echo "<title>Накладная №{$PS_ID}</title>";
                 </div>\n
             </div>\n
         ";
+
+        // Накладная на паллеты BEKO
+        if( $CB_ID == 3 ) {
+            echo "
+                <div class='page'>
+                    <div style='border-bottom: 2px solid; width: 100%;'>
+                        <p style='text-align: left; font-size: 1.3em;'><b>Расходная накладная №{$PS_ID} от {$ps_date_format} г.</b></p>
+                    </div>
+                    <p style='text-align: left;'>Поставщик: <b>{$M_company}</b></p>
+                    <p style='text-align: left;'>Покупатель: <b>{$CB_company}</b></p>
+                    <table style='border: 2px solid;'>
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Артикул</th>
+                                <th>Товар</th>
+                                <th colspan='2'>Мест</th>
+                                <th colspan='2'>Количество</th>
+                                <th>Цена</th>
+                                <th>Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody style='text-align: left;'>
+                            <tr>
+                                <td style='text-align: center;'>1</td>
+                                <td></td>
+                                <td>Паллет для противовесов 4698020079</td>
+                                <td style='width: 30px;'></td>
+                                <td>шт</td>
+                                <td style='text-align: right;'>{$quantity}</td>
+                                <td>шт</td>
+                                <td style='text-align: right;'>0,00</td>
+                                <td style='text-align: right;'>0,00</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style='margin-top: 0px; display: flex; justify-content: space-between; flex-wrap: wrap;'>
+                        <p style='display: block; text-align: right; width: 90%;'><b>Итого:</b></p>
+                        <p style='display: block; text-align: right; width: 9%;'><b>0,00</b></p>
+                    </div>
+                    <div style='margin-top: 0px; display: flex; justify-content: space-between; flex-wrap: wrap;'>
+                        <p style='display: block; text-align: right; width: 90%;'><b>Сумма НДС</b></p>
+                        <p style='display: block; text-align: right; width: 9%;'><b>0,00</b></p>
+                    </div>
+                    <div style='margin-top: 0px; border-bottom: 2px solid;'>
+                        <p>Всего наименований 1 на сумму 0,00 руб.</p>
+                    </div>
+                <div style='margin-top: 20px; display: flex; justify-content: space-between; flex-wrap: wrap;'>
+                    <div style='width: 47%;'>
+                        <div style='margin-bottom: 0px; display: flex; justify-content: space-between; flex-wrap: wrap;'>
+                            <div style='width: 49%;'><p><b>Отпустил</b> ___________ </p></div>
+                            <div style='text-decoration: underline; width: 49%;'><p style='font-size: 0.9em; margin: 0px;'>{$job_title_1} {$full_name_1}</p></div>
+                        </div>
+                    </div>
+                    <div style='width: 47%;'>
+                        <p style='margin-bottom: 0px;'><b>Получил</b> _______________________ </p>
+                    </div>
+                </div>
+
+                </div>
+            ";
+        }
     }
 ?>
 </html>
