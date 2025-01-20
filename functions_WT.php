@@ -391,7 +391,8 @@ function read_transaction_LPP($ID, $curnum, $socket, $mysqli) {
 									,WT_ID = {$deviceID}
 									,F_ID = (SELECT F_ID FROM WeighingTerminal WHERE WT_ID = {$deviceID})
 									,CWP_ID = {$goodsID}
-									,PN_ID = (SELECT PN_ID FROM factory WHERE F_ID = (SELECT F_ID FROM WeighingTerminal WHERE WT_ID = {$deviceID}))
+									#,PN_ID = (SELECT PN_ID FROM factory WHERE F_ID = (SELECT F_ID FROM WeighingTerminal WHERE WT_ID = {$deviceID}))
+									,PN_ID = (SELECT PN_ID FROM ClientBrand WHERE CB_ID = (SELECT CB_ID FROM CounterWeightPallet WHERE CWP_ID = {$goodsID}))
 								ON DUPLICATE KEY UPDATE
 									packed_time = '{$transactionDate}'
 							";
