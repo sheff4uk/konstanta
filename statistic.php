@@ -126,7 +126,7 @@ foreach ($_GET as &$value) {
 			<th>Дата расформовки</th>
 			<th>Код противовеса</th>
 			<th>Кол-во кассет</th>
-			<th>Ранняя расформовка</th>
+			<!-- <th>Ранняя расформовка</th> -->
 <!--			<th>Несоответствие по весу</th>-->
 			<th>Непролив</th>
 			<th>Мех. трещина</th>
@@ -220,7 +220,7 @@ while( $row = mysqli_fetch_array($res) ) {
 
 		echo "<td>{$subrow["item"]}</td>";
 		echo "<td>{$subrow["cnt"]}</td>";
-		echo "<td>{$subrow["o_interval"]}</td>";
+		//echo "<td>{$subrow["o_interval"]}</td>";
 		//echo "<td>{$subrow["not_spec"]}</td>";
 		echo "<td>{$subrow["not_spill"]}</td>";
 		echo "<td>{$subrow["crack"]}</td>";
@@ -240,7 +240,7 @@ while( $row = mysqli_fetch_array($res) ) {
 	echo "<tr class='summary'>";
 	echo "<td>Итог:</td>";
 	echo "<td>{$row["cnt"]}</td>";
-	echo "<td>{$row["o_interval"]}</td>";
+	//echo "<td>{$row["o_interval"]}</td>";
 	//echo "<td>{$row["not_spec"]}</td>";
 	echo "<td>{$row["not_spill"]}</td>";
 	echo "<td>{$row["crack"]}</td>";
@@ -335,7 +335,7 @@ if( $filter ) {
 
 			echo "<td>{$subrow["item"]}</td>";
 			echo "<td>{$subrow["cnt"]}</td>";
-			echo "<td>{$subrow["o_interval"]}</td>";
+			//echo "<td>{$subrow["o_interval"]}</td>";
 			//echo "<td>{$subrow["not_spec"]}</td>";
 			echo "<td>{$subrow["not_spill"]}</td>";
 			echo "<td>{$subrow["crack"]}</td>";
@@ -355,7 +355,7 @@ if( $filter ) {
 		echo "<tr class='summary total'>";
 		echo "<td>Итог:</td>";
 		echo "<td>{$row["cnt"]}</td>";
-		echo "<td>{$row["o_interval"]}</td>";
+		//echo "<td>{$row["o_interval"]}</td>";
 		//echo "<td>{$row["not_spec"]}</td>";
 		echo "<td>{$row["not_spill"]}</td>";
 		echo "<td>{$row["crack"]}</td>";
