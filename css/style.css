@@ -3,6 +3,15 @@
 	src: url('../fonts/HelveticaNeue.ttf') format('truetype');
 }
 
+@media print {
+	#toTop {
+		display: none !important;
+	}
+	.total td {
+		color: black !important;
+	}
+}
+
 * {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
