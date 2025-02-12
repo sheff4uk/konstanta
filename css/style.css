@@ -7,8 +7,11 @@
 	#toTop {
 		display: none !important;
 	}
-	.total td {
+	body, .total td {
 		color: black !important;
+	}
+	tr, td, th {
+		border-color: black !important;
 	}
 }
 
