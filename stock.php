@@ -9,6 +9,17 @@ if( !in_array('stock', $Rights) ) {
 	die('Недостаточно прав для совершения операции');
 }
 
+// Если в фильтре не установлен месяц, показываем текущий
+if( !$_GET["month"] ) {
+	$query = "SELECT DATE_FORMAT(CURDATE(), '%Y%m') month";
+	$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+	$row = mysqli_fetch_array($res);
+	$_GET["month"] = $row["month"];
+
+}
+$year = substr($_GET["month"], 0, 4);
+$month = substr($_GET["month"], 4, 2);
+
 // Если не выбран участок, берем из сессии
 if( !$_GET["F_ID"] ) {
 	$_GET["F_ID"] = $_SESSION['F_ID'];
@@ -28,7 +39,7 @@ if( isset($_GET["remove"]) ) {
 	";
 	mysqli_query( $mysqli, $query );
 
-	exit ('<meta http-equiv="refresh" content="0; url=/stock.php?F_ID='.$_GET["F_ID"].'#'.$LPP_ID.'">');
+	exit ('<meta http-equiv="refresh" content="0; url=/stock.php?F_ID='.$_GET["F_ID"].'&month='.$_GET["month"].'#'.$LPP_ID.'">');
 }
 
 //Восстановление регистрации поддона
@@ -43,7 +54,7 @@ if( isset($_GET["undo"]) ) {
 	";
 	mysqli_query( $mysqli, $query );
 
-	exit ('<meta http-equiv="refresh" content="0; url=/stock.php?F_ID='.$_GET["F_ID"].'#'.$LPP_ID.'">');
+	exit ('<meta http-equiv="refresh" content="0; url=/stock.php?F_ID='.$_GET["F_ID"].'&month='.$_GET["month"].'#'.$LPP_ID.'">');
 }
 
 //Принудительный сбор данных с терминала упаковки
@@ -89,44 +100,44 @@ if( isset($_GET["download"]) ) {
 	}
 	////////////////////////////////////////////////////////////
 
-	exit ('<meta http-equiv="refresh" content="0; url=/stock.php?F_ID='.$_GET["F_ID"].'">');
+	exit ('<meta http-equiv="refresh" content="0; url=/stock.php?F_ID='.$_GET["F_ID"].'&month='.$_GET["month"].'">');
 }
 
-//Удаляем неотгруженные регистрации старше 3-х месяцев
-$query = "
-	UPDATE list__PackingPallet
-	SET removal_time = NOW()
-	WHERE F_ID = {$_GET["F_ID"]}
-		AND scan_time IS NULL
-		AND shipment_time IS NULL
-		AND packed_time < NOW() - INTERVAL 3 month
-";
-mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+// //Удаляем неотгруженные регистрации старше 3-х месяцев
+// $query = "
+// 	UPDATE list__PackingPallet
+// 	SET removal_time = NOW()
+// 	WHERE F_ID = {$_GET["F_ID"]}
+// 		AND scan_time IS NULL
+// 		AND shipment_time IS NULL
+// 		AND packed_time < NOW() - INTERVAL 3 month
+// ";
+// mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 
-// Узнаем время упаковки самого старого поддона на складе
-$query = "
-	SELECT IFNULL(DATE(MIN(LPP.packed_time)), CURDATE()) date_from
-	FROM list__PackingPallet LPP
-	JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LPP.CWP_ID
-	LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
-	WHERE LPP.shipment_time IS NULL
-		AND LPP.removal_time IS NULL
-		AND LPP.F_ID = {$_GET["F_ID"]}
-		AND IFNULL(CW.CB_ID, 0) != 5
-";
-$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
-$row = mysqli_fetch_array($res);
-$date_from = $row["date_from"];
+// // Узнаем время упаковки самого старого поддона на складе
+// $query = "
+// 	SELECT IFNULL(DATE(MIN(LPP.packed_time)), CURDATE()) date_from
+// 	FROM list__PackingPallet LPP
+// 	JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LPP.CWP_ID
+// 	LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
+// 	WHERE LPP.shipment_time IS NULL
+// 		AND LPP.removal_time IS NULL
+// 		AND LPP.F_ID = {$_GET["F_ID"]}
+// 		AND IFNULL(CW.CB_ID, 0) != 5
+// ";
+// $res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+// $row = mysqli_fetch_array($res);
+// $date_from = $row["date_from"];
 
 // Получаем список отгрузок и сохраняем в массив
 $query = "
 	SELECT LPP.shipment_time
 	FROM list__PackingPallet LPP
-	WHERE DATE(LPP.packed_time) >= '{$date_from}'
-		AND LPP.shipment_time IS NOT NULL
+	WHERE LPP.shipment_time IS NOT NULL
 		AND LPP.F_ID = {$_GET["F_ID"]}
 	GROUP BY LPP.shipment_time
 	ORDER BY LPP.shipment_time DESC
+	LIMIT 80
 ";
 $shipment_arr = array();
 $i = 100;
@@ -162,6 +173,51 @@ while( $row = mysqli_fetch_array($res) ) {
 				?>
 			</select>
 		</div>
+
+		<div class="nowrap" style="margin-bottom: 10px;">
+			<span>Месяц:</span>
+			<select name="month" class="<?=$_GET["month"] ? "filtered" : ""?>" onchange="this.form.submit()">
+				<?php
+				$query = "
+					SELECT YEAR(CURDATE()) year
+					UNION
+					SELECT YEAR(packed_time) year
+					FROM list__PackingPallet
+					ORDER BY year DESC
+				";
+				$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+				while( $row = mysqli_fetch_array($res) ) {
+					echo "<optgroup label='{$row["year"]}'>";
+					$query = "
+						SELECT SUB.month
+							,SUB.month_format
+						FROM (
+							SELECT YEAR(CURDATE()) year
+								,DATE_FORMAT(CURDATE(), '%Y%m') month
+								,DATE_FORMAT(CURDATE(), '%c') month_format
+							UNION
+							SELECT YEAR(packed_time) year
+								,DATE_FORMAT(packed_time, '%Y%m') month
+								,DATE_FORMAT(packed_time, '%c') month_format
+							FROM list__PackingPallet
+							WHERE YEAR(packed_time) = {$row["year"]}
+							GROUP BY month
+						) SUB
+						WHERE SUB.year = {$row["year"]}
+						ORDER BY SUB.month DESC
+					";
+					$subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+					while( $subrow = mysqli_fetch_array($subres) ) {
+						$selected = ($subrow["month"] == $_GET["month"]) ? "selected" : "";
+						echo "<option value='{$subrow["month"]}' {$selected}>{$MONTHS[$subrow["month_format"]]}</option>";
+					}
+					echo "</optgroup>";
+				}
+				?>
+			</select>
+			<i class="fas fa-question-circle" title="По умолчанию устанавливается текущий месяц."></i>
+		</div>
+
 	</form>
 </div>
 
@@ -240,7 +296,7 @@ foreach ($_GET as &$value) {
 	<table style="text-align: center; font-weight: bold;">
 		<thead>
 			<tr>
-				<th rowspan="2"><a href="stock.php?F_ID=<?=$_GET["F_ID"]?>&download" title="Собрать данные из терминала"><i class="fa-solid fa-download fa-2x"></i></a> Комплект противовесов</th>
+				<th rowspan="2"><a href="stock.php?F_ID=<?=$_GET["F_ID"]?>&month=<?=$year.$month?>&download" title="Собрать данные из терминала"><i class="fa-solid fa-download fa-2x"></i></a> Комплект противовесов</th>
 				<th colspan="8">Кол-во паллетов</th>
 			</tr>
 			<tr>
@@ -283,7 +339,7 @@ foreach ($_GET as &$value) {
 					,0 in_cassette
 					FROM list__PackingPallet LPP
 					WHERE LPP.F_ID = {$_GET["F_ID"]}
-					AND DATE(LPP.packed_time) >= '{$date_from}'
+					#AND DATE(LPP.packed_time) >= '{$date_from}'
 					GROUP BY LPP.CWP_ID
 					
 					UNION
@@ -376,7 +432,7 @@ foreach ($_GET as &$value) {
 					item = $(this).parents("td").attr("item");
 				confirm(
 					"<span style='font-size: 1.2em;'>Подтвердите <font color='red'>удаление</font> регистрации с номером <b>" + nextID + "</b> (комплект противовесов <b>" + item + "</b>).</span>",
-					"stock.php?remove=" + id + "&F_ID=<?=$_GET["F_ID"]?>"
+					"stock.php?remove=" + id + "&F_ID=<?=$_GET["F_ID"]?>&month=<?=$year.$month?>"
 				);
 			});
 
@@ -388,7 +444,7 @@ foreach ($_GET as &$value) {
 					item = $(this).parents("td").attr("item");
 				confirm(
 					"<span style='font-size: 1.2em;'>Подтвердите <font color='green'>восстановление</font> регистрации с номером <b>" + nextID + "</b> (комплект противовесов <b>" + item + "</b>).</span>",
-					"stock.php?undo=" + id + "&F_ID=<?=$_GET["F_ID"]?>"
+					"stock.php?undo=" + id + "&F_ID=<?=$_GET["F_ID"]?>&month=<?=$year.$month?>"
 				);
 			});
 
@@ -418,7 +474,8 @@ foreach ($_GET as &$value) {
 				JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LPP.CWP_ID
 				LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
 				WHERE LPP.F_ID = {$_GET["F_ID"]}
-					AND DATE(LPP.packed_time) >= '{$date_from}'
+					AND YEAR(LPP.packed_time) = {$year}
+					AND MONTH(LPP.packed_time) = {$month}
 					AND IFNULL(CW.CB_ID, 0) != 5
 				GROUP BY LPP.CWP_ID
 				ORDER BY LPP.CWP_ID ASC
@@ -449,7 +506,8 @@ $query = "
 	FROM list__PackingPallet LPP
 	JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LPP.CWP_ID
 	LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
-	WHERE DATE(LPP.packed_time) >= '{$date_from}'
+	WHERE YEAR(LPP.packed_time) = {$year}
+		AND MONTH(LPP.packed_time) = {$month}
 		AND LPP.F_ID = {$_GET["F_ID"]}
 		AND IFNULL(CW.CB_ID, 0) != 5
 	ORDER BY LPP.packed_time DESC
@@ -460,7 +518,7 @@ while( $row = mysqli_fetch_array($res) ) {
 	echo "<td>{$row["packed_time_format"]}</td>";
 	foreach ( $cwp_arr as $value ) {
 		if( $value == $row["CWP_ID"] ) {
-			echo "<td nextID='{$row["nextID"]}' item='{$row["item"]}' style='background-color: ".($row["shipment_time"] ? "rgb(0,128,0,.{$shipment_arr[$row["shipment_time"]]});" : ($row["removal_time_format"] ? "gray;" : "orange;")).($row["ready"] || $row["removal_time_format"] ? "" : "border-left: 6px solid red;")."'><b>{$row["nextID"]}</b>&nbsp;".($row["shipment_time_format"] ? "" : ($row["removal_time_format"] ? "<font color='red'><i class='fa fa-undo'></i></font>" : "<font color='red'><i class='fa fa-times'></i></font>"))."<br>{$row["shipment_time_format"]}</td>";
+			echo "<td nextID='{$row["nextID"]}' item='{$row["item"]}' style='background-color: ".($row["shipment_time"] ? ($shipment_arr[$row["shipment_time"]] ? "rgb(0,128,0,.{$shipment_arr[$row["shipment_time"]]});" : "rgb(0,128,0,.{$i});") : ($row["removal_time_format"] ? "gray;" : "orange;")).($row["ready"] || $row["removal_time_format"] ? "" : "border-left: 6px solid red;")."'><b>{$row["nextID"]}</b>&nbsp;".($row["shipment_time_format"] ? "" : ($row["removal_time_format"] ? "<font color='red'><i class='fa fa-undo'></i></font>" : "<font color='red'><i class='fa fa-times'></i></font>"))."<br>{$row["shipment_time_format"]}</td>";
 		}
 		else {
 			echo "<td></td>";

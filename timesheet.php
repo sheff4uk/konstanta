@@ -140,7 +140,7 @@ if( !in_array('timesheet', $Rights) ) {
 	die('Недостаточно прав для совершения операции');
 }
 
-// Если в фильтре не установлена неделя, показываем текущую
+// Если в фильтре не установлен месяц, показываем текущий
 if( !$_GET["month"] ) {
 	$query = "SELECT DATE_FORMAT(CURDATE(), '%Y%m') month";
 	$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
