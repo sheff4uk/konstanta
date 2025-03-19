@@ -114,20 +114,20 @@ if( isset($_GET["download"]) ) {
 // ";
 // mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 
-// // Узнаем время упаковки самого старого поддона на складе
-// $query = "
-// 	SELECT IFNULL(DATE(MIN(LPP.packed_time)), CURDATE()) date_from
-// 	FROM list__PackingPallet LPP
-// 	JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LPP.CWP_ID
-// 	LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
-// 	WHERE LPP.shipment_time IS NULL
-// 		AND LPP.removal_time IS NULL
-// 		AND LPP.F_ID = {$_GET["F_ID"]}
-// 		AND IFNULL(CW.CB_ID, 0) != 5
-// ";
-// $res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
-// $row = mysqli_fetch_array($res);
-// $date_from = $row["date_from"];
+// Узнаем время упаковки самого старого поддона на складе
+$query = "
+	SELECT IFNULL(DATE(MIN(LPP.packed_time)), CURDATE()) date_from
+	FROM list__PackingPallet LPP
+	JOIN CounterWeightPallet CWP ON CWP.CWP_ID = LPP.CWP_ID
+	LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
+	WHERE LPP.shipment_time IS NULL
+		AND LPP.removal_time IS NULL
+		AND LPP.F_ID = {$_GET["F_ID"]}
+		AND IFNULL(CW.CB_ID, 0) != 5
+";
+$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+$row = mysqli_fetch_array($res);
+$date_from = $row["date_from"];
 
 // Получаем список отгрузок и сохраняем в массив
 $query = "
@@ -339,7 +339,7 @@ foreach ($_GET as &$value) {
 					,0 in_cassette
 					FROM list__PackingPallet LPP
 					WHERE LPP.F_ID = {$_GET["F_ID"]}
-					#AND DATE(LPP.packed_time) >= '{$date_from}'
+					AND DATE(LPP.packed_time) >= '{$date_from}'
 					GROUP BY LPP.CWP_ID
 					
 					UNION
