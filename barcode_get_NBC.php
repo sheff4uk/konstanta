@@ -131,8 +131,8 @@ $notification_group = $row["notification_group"];
 				while( $row = mysqli_fetch_array($res) ) {
 					// Открываем сокет и запускаем функцию чтения и записывания в БД регистраций
 					$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-					$IP = ($row["WT_ID"] == 38372 ? "91.144.175.13" : $from_ip);
-					if( socket_connect($socket, $IP, $row["port"]) ) {
+					//$IP = ($row["WT_ID"] == 38372 ? "91.144.175.13" : $from_ip);
+					if( socket_connect($socket, $from_i, $row["port"]) ) {
 						read_transaction_LW($row["last_transaction"]+1, 1, $socket, $mysqli);
 					}
 					else {
