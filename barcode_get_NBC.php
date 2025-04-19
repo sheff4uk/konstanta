@@ -132,7 +132,7 @@ $notification_group = $row["notification_group"];
 					// Открываем сокет и запускаем функцию чтения и записывания в БД регистраций
 					$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 					//$IP = ($row["WT_ID"] == 38372 ? "91.144.175.13" : $from_ip);
-					if( socket_connect($socket, $from_i, $row["port"]) ) {
+					if( socket_connect($socket, $from_ip, $row["port"]) ) {
 						read_transaction_LW($row["last_transaction"]+1, 1, $socket, $mysqli);
 					}
 					else {
