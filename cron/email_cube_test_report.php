@@ -38,7 +38,7 @@ $message .= "
 			<tr>
 				<th>Part-number</th>
 				<th>Time of filling</th>
-				<th>Mass of a cube of concrete solution, kg</th>
+				<!--<th>Mass of a cube of concrete solution, kg</th>-->
 				<th>Time to test</th>
 				<th>Mass of the test cube, kg</th>
                 <th>Curing time in hours</th>
@@ -75,7 +75,7 @@ while( $row = mysqli_fetch_array($res) ) {
 		<tr>\n
 			<td style='background-color: #ccc'>{$row["drawing_item"]}</td>
 			<td style='background-color: #ccc'>{$row["batch_date_format"]} {$row["batch_time_format"]}</td>
-			<td style='background-color: #ccc'>{$row["mix_density"]}</td>
+			<!--<td style='background-color: #ccc'>{$row["mix_density"]}</td>-->
 			<td>{$row["test_date"]} {$row["test_time"]}</td>
 			<td>{$row["cube_weight"]}</td>
 			<td>{$row["delay_fact"]}</td>
