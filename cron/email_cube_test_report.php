@@ -56,8 +56,8 @@ $query = "
 		,DATE_FORMAT(LB.batch_date, '%d.%m.%y') batch_date_format
 		,DATE_FORMAT(LB.batch_time, '%H:%i') batch_time_format
 		,TIMESTAMPDIFF(HOUR, CAST(CONCAT(LB.batch_date, ' ', LB.batch_time) as datetime), CAST(CONCAT(LCT.test_date, ' ', LCT.test_time) as datetime)) delay_fact
-		,LB.mix_density / 1000 mix_density
-		,LCT.cube_weight / 1000 cube_weight
+		,ROUND(LB.mix_density / 1000, 2) mix_density
+		,ROUND(LCT.cube_weight / 1000, 2) cube_weight
 		,LCT.pressure
         ,IF(LCT.delay = 24, IF(LCT.pressure < 20, 1, 0), IF(LCT.pressure < 30, 1, 0)) press_error
 	FROM list__CubeTest LCT
