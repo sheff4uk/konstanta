@@ -50,10 +50,10 @@ $message .= "
 ";
 
 $query = "
-	SELECT DATE_FORMAT(LCT.test_date, '%d.%m.%y') test_date
+	SELECT DATE_FORMAT(LCT.test_date, '%d/%m/%Y') test_date
 		,DATE_FORMAT(LCT.test_time, '%H:%i') test_time
 		,CW.drawing_item
-		,DATE_FORMAT(LB.batch_date, '%d.%m.%y') batch_date_format
+		,DATE_FORMAT(LB.batch_date, '%d/%m/%Y') batch_date_format
 		,DATE_FORMAT(LB.batch_time, '%H:%i') batch_time_format
 		,TIMESTAMPDIFF(HOUR, CAST(CONCAT(LB.batch_date, ' ', LB.batch_time) as datetime), CAST(CONCAT(LCT.test_date, ' ', LCT.test_time) as datetime)) delay_fact
 		,ROUND(LB.mix_density / 1000, 2) mix_density
