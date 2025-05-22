@@ -91,7 +91,7 @@ if( isset($_POST["lpp_id"]) ) {
 		if( mysqli_affected_rows($mysqli) ) {
 			// Сообщение в телеграм об отгрузке машины
 			//$message = "🚛";
-			$message = "";
+			$message = "Накладная №{$_POST["ps_id"]} / {$priority}";
 			$query = "
 				SELECT CONCAT(IFNULL(CW.item, CWP.cwp_name), ' (', CWP.in_pallet, 'шт)') item
 					,SUM(1) cnt
