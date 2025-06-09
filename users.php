@@ -457,8 +457,7 @@ foreach ($_GET as &$value) {
 <div id='add_btn' class="add_user" title='Добавить пользователя'></div>
 
 <div id='user_form' class='addproduct' title='Данные пользователя' style='display:none;'>
-	<form enctype='multipart/form-data' method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form enctype='multipart/form-data' method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<div id="USR_ID" style="width: auto; float: right; transform: scale(3);"></div>
 			<input type="hidden" name="USR_ID">

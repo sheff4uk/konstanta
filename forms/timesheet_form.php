@@ -345,8 +345,7 @@ if( isset($_POST["F_ID"]) ) {
 </style>
 
 <div id='timesheet_form' style='display:none;'>
-	<form method='post' action="/forms/timesheet_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/timesheet_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="F_ID" value="<?=$F_ID?>">
 			<input type="hidden" name="month" value="<?=$_GET["month"]?>">

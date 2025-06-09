@@ -204,8 +204,7 @@ if( isset($_POST["PB_ID"]) ) {
 </style>
 
 <div id='filling_form' title='Чеклист оператора' style='display:none;'>
-	<form method='post' action="/forms/filling_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/filling_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<!--Содержимое формы аяксом-->
 		</fieldset>

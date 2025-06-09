@@ -54,8 +54,7 @@ if( isset($_POST["oa_cnt"]) ) {
 ?>
 
 <div id='outcoming_form' title='Выдача СИЗ в <?=$f_name?>' style='display:none;'>
-	<form method='post' action="/forms/overal_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/overal_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset style="background: #db443788;">
 			<input type="hidden" name="OA_ID">
 			<input type="hidden" name="sign" value="-1">
@@ -108,8 +107,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 </div>
 
 <div id='incoming_form' title='Приход СИЗ в <?=$f_name?>' style='display:none;'>
-	<form method='post' action="/forms/overal_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/overal_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset style="background: #16A08588;">
 			<input type="hidden" name="OA_ID">
 			<input type="hidden" name="sign" value="1">

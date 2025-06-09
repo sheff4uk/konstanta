@@ -62,8 +62,7 @@ if( isset($_POST["LO_ID"]) ) {
 </style>
 
 <div id='opening_form' title='Данные расформовки' style='display:none;'>
-	<form method='post' action="/forms/opening_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/opening_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="LO_ID">
 			<div class="nowrap" style="display: inline-block; margin-bottom: 10px; margin-right: 30px;">
@@ -108,8 +107,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 </div>
 
 <div id='weight_form' title='Регистрации противовесов' style='display:none;'>
-	<form method='post' action="/forms/opening_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/opening_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<!--Содержимое формы аяксом-->
 		</fieldset>

@@ -126,8 +126,7 @@ if( isset($_POST["fa_cnt"]) ) {
 </style>
 
 <div id='fuel_filling_form' title='Заправка техники' style='display:none;'>
-	<form method='post' action="/forms/fuel_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/fuel_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="FF_ID">
 			<input type="hidden" name="FT_ID" value="<?=$FT_ID?>">
@@ -184,8 +183,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 </div>
 
 <div id='fuel_arrival_form' title='Приобретение дизтоплива' style='display:none;'>
-	<form method='post' action="/forms/fuel_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/fuel_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="FA_ID">
 			<input type="hidden" name="FT_ID" value="<?=$FT_ID?>">

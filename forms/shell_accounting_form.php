@@ -137,8 +137,7 @@ if( isset($_POST["sa_cnt"]) ) {
 </style>
 
 <div id='shell_reject_form' title='Списание форм' style='display:none;'>
-	<form method='post' action="/forms/shell_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/shell_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="SR_ID">
 			<input type="hidden" name="date_from" value="<?=$_GET["date_from"]?>">
@@ -192,8 +191,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 </div>
 
 <div id='shell_arrival_form' title='Приход форм' style='display:none;'>
-	<form method='post' action="/forms/shell_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/shell_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="SA_ID">
 			<input type="hidden" name="date_from" value="<?=$_GET["date_from"]?>">

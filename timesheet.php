@@ -639,8 +639,7 @@ foreach ($_GET as &$value) {
 <div id="timesheet_report_btn" title="Распечатать табель"><a href="/printforms/timesheet_report.php?F_ID=<?=$_GET["F_ID"]?>&month=<?=$_GET["month"]?>&user_type=<?=$user_type?>" class="print" style="color: white;"><i class="fas fa-2x fa-print"></i></a></div>
 
 <div id='tariff_form' class="addproduct" style='display:none;'>
-	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="F_ID" value="<?=$F_ID?>">
 			<input type="hidden" name="month" value="<?=$_GET["month"]?>">
@@ -682,8 +681,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 </div>
 
 <div id='uploads_form' class="addproduct" style='display:none;'>
-	<form enctype='multipart/form-data' method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form enctype='multipart/form-data' method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="F_ID" value="<?=$F_ID?>">
 			<input type="hidden" name="month" value="<?=$_GET["month"]?>">

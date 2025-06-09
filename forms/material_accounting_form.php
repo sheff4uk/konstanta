@@ -216,8 +216,7 @@ if( isset($_POST["carrier_add"]) ) {
 ?>
 
 <div id='material_arrival_form' title='Данные приемки сырья' style='display:none;'>
-	<form method='post' action="/forms/material_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/material_accounting_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="MA_ID">
 			<div class="nowrap" style="display: inline-block; margin-bottom: 10px; margin-right: 30px;">
@@ -323,8 +322,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 
 <!-- Форма добавления/редактирования приобретаемой продукции -->
 <div id='material_list_form' style='display:none;' title="Редактирование списка продукции">
-	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<table style="width: 100%; table-layout: fixed;">
 				<thead>
@@ -362,8 +360,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 
 <!-- Форма добавления/редактирования поставщика -->
 <div id='supplier_list_form' style='display:none;' title="Редактирование списка поставщиков">
-	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<table style="width: 100%; table-layout: fixed;">
 				<thead>
@@ -401,8 +398,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 
 <!-- Форма добавления/редактирования перевозчика -->
 <div id='carrier_list_form' style='display:none;' title="Редактирование списка перевозчиков">
-	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<table style="width: 100%; table-layout: fixed;">
 				<thead>
@@ -440,8 +436,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 
 <!-- Форма корректировки остатков сырья -->
 <div id='material_balance_form' title='Корректировка остатков сырья' style='display:none;'>
-	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="F_ID">
 			<input type="hidden" name="MN_ID">
@@ -473,8 +468,7 @@ this.subbut.value='Подождите, пожалуйста!';">
 
 <!-- Форма перемещения сырья между участками -->
 <div id='material_movement_form' title='Перемещение сырья между участками ' style='display:none;'>
-	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 		<input type="hidden" name="F_ID">
 		<input type="hidden" name="MN_ID">

@@ -65,8 +65,7 @@ if( isset($_POST["LB_ID"]) ) {
 </style>
 
 <div id='cubetest_form' title='Данные протокола испытаний куба' style='display:none;'>
-	<form method='post' action="/forms/cubetest_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/cubetest_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="LCT_ID">
 			<input type="hidden" name="delay">

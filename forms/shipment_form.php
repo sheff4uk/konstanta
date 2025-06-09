@@ -71,8 +71,7 @@ if( isset($_POST["CWP_ID"]) ) {
 </style>
 
 <div id='shipment_form' title='Данные отгрузки' style='display:none;'>
-	<form method='post' action="/forms/shipment_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/shipment_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="LS_ID">
 

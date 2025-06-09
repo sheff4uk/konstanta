@@ -38,8 +38,7 @@ if( isset($_POST["day"]) ) {
 ?>
 
 <div id='shift_log_form' title='Смены' style='display:none;'>
-	<form method='post' action="/forms/shift_log_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/shift_log_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<!--Содержимое формы аяксом-->
 		</fieldset>

@@ -73,8 +73,7 @@ if( isset($_POST["MF_ID"]) ) {
 </style>
 
 <div id='formula_form' class='addproduct' style='display:none;'>
-	<form method='post' action="/forms/mix_formula_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/mix_formula_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="MF_ID">
 			<input type="hidden" name="F_ID">

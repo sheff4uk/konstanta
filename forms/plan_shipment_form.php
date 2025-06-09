@@ -75,8 +75,7 @@ if( isset($_POST["ps_date"]) ) {
 </style>
 
 <div id='plan_shipment_form' title='Данные плана отгрузки' style='display:none;'>
-	<form method='post' action="/forms/plan_shipment_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/plan_shipment_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="PS_ID">
 			<input type="hidden" name="F_ID" value="<?=$_GET["F_ID"]?>">

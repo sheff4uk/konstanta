@@ -50,8 +50,7 @@ if( isset($_POST["cycle"]) ) {
 </style>
 
 <div id='plan_batch_form' title='Данные плана заливки' style='display:none;'>
-	<form method='post' action="/forms/plan_batch_form.php" onsubmit="JavaScript:this.subbut.disabled=true;
-this.subbut.value='Подождите, пожалуйста!';">
+	<form method='post' action="/forms/plan_batch_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="year">
 			<input type="hidden" name="cycle">
