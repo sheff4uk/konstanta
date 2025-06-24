@@ -3,7 +3,6 @@ include "config.php";
 $title = 'Бланки';
 include "header.php";
 
-
 // Проверка прав на доступ к экрану
 if( !in_array('blanks', $Rights) ) {
 	header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden');
