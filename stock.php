@@ -335,8 +335,8 @@ foreach ($_GET as &$value) {
 					,SUM(IF(LPP.packed_time <= NOW() - INTERVAL 114 HOUR AND LPP.shipment_time IS NULL AND LPP.removal_time IS NULL, 1, 0)) ready
 					,SUM(IF(LPP.shipment_time IS NULL AND LPP.removal_time IS NULL, 1, 0)) total
 					#,CWP.in_pallet
-					,SUB1.in_cass
-					,SUB1.in_cassette
+					,IFNULL(SUB1.in_cass, 0) in_cass
+					,IFNULL(SUB1.in_cassette, 0) in_cassette
 					FROM list__PackingPallet LPP
                     LEFT JOIN (
 						SELECT CWP.CWP_ID
