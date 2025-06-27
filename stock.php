@@ -335,34 +335,26 @@ foreach ($_GET as &$value) {
 					,SUM(IF(LPP.packed_time <= NOW() - INTERVAL 114 HOUR AND LPP.shipment_time IS NULL AND LPP.removal_time IS NULL, 1, 0)) ready
 					,SUM(IF(LPP.shipment_time IS NULL AND LPP.removal_time IS NULL, 1, 0)) total
 					#,CWP.in_pallet
-					,0 in_cass
-					,0 in_cassette
+					,SUB1.in_cass
+					,SUB1.in_cassette
 					FROM list__PackingPallet LPP
+                    LEFT JOIN (
+						SELECT CWP.CWP_ID
+						,FLOOR(SUM(IF((SELECT LF_ID FROM list__Filling WHERE cassette = LF.cassette AND filling_time > LF.filling_time LIMIT 1) IS NULL, (PB.in_cassette - LF.underfilling), 0)) / CWP.in_pallet) in_cass
+						,SUM(IF((SELECT LF_ID FROM list__Filling WHERE cassette = LF.cassette AND filling_time > LF.filling_time LIMIT 1) IS NULL, (PB.in_cassette - LF.underfilling), 0)) in_cassette
+						FROM CounterWeightPallet CWP
+						JOIN plan__Batch PB ON PB.CW_ID = CWP.CW_ID
+						JOIN list__Batch LB ON LB.PB_ID = PB.PB_ID
+						JOIN list__Filling LF ON LF.LB_ID = LB.LB_ID
+						AND LF.filling_time > NOW() - INTERVAL 2 WEEK
+						LEFT JOIN list__Opening LO ON LO.LF_ID = LF.LF_ID
+						WHERE PB.F_ID = {$_GET["F_ID"]}
+						AND LO.LO_ID IS NULL
+						GROUP BY CWP.CWP_ID
+                    ) SUB1 ON SUB1.CWP_ID = LPP.CWP_ID
 					WHERE LPP.F_ID = {$_GET["F_ID"]}
 					AND DATE(LPP.packed_time) >= '{$date_from}'
 					GROUP BY LPP.CWP_ID
-					
-					UNION
-					
-					SELECT CWP.CWP_ID
-					,0
-					,0
-					,0
-					,0
-					,0
-					,0
-					,0
-					,FLOOR(SUM(IF((SELECT LF_ID FROM list__Filling WHERE cassette = LF.cassette AND filling_time > LF.filling_time LIMIT 1) IS NULL, (PB.in_cassette - LF.underfilling), 0)) / CWP.in_pallet) in_cass
-					,SUM(IF((SELECT LF_ID FROM list__Filling WHERE cassette = LF.cassette AND filling_time > LF.filling_time LIMIT 1) IS NULL, (PB.in_cassette - LF.underfilling), 0)) in_cassette
-					FROM CounterWeightPallet CWP
-					JOIN plan__Batch PB ON PB.CW_ID = CWP.CW_ID
-					JOIN list__Batch LB ON LB.PB_ID = PB.PB_ID
-					JOIN list__Filling LF ON LF.LB_ID = LB.LB_ID
-					AND LF.filling_time > NOW() - INTERVAL 2 WEEK
-					LEFT JOIN list__Opening LO ON LO.LF_ID = LF.LF_ID
-					WHERE PB.F_ID = {$_GET["F_ID"]}
-					AND LO.LO_ID IS NULL
-					GROUP BY CWP.CWP_ID
 				) SUB ON SUB.CWP_ID = CWP.CWP_ID
 				LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
 				WHERE IFNULL(CW.CB_ID, 0) != 5
