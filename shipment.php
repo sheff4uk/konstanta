@@ -268,7 +268,7 @@ while( $row = mysqli_fetch_array($res) ) {
 	</tbody>
 </table>
 
-<div id="add_btn" class="add_ps" ls_date="<?=$_GET["ls_date"]?>" title="Внести данные плана отгрузки"></div>
+<!-- <div id="add_btn" class="add_ps" ls_date="<?=$_GET["ls_date"]?>" title="Внести данные плана отгрузки"></div> -->
 
 <script>
 	$(function() {
