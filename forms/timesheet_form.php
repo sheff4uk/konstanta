@@ -206,6 +206,7 @@ if( isset($_POST["F_ID"]) ) {
 				ON DUPLICATE KEY UPDATE
 					shift_num = shift_num
 			";
+			echo $query;
 			mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 
 			# Узнаем TSS_ID
