@@ -315,7 +315,7 @@ function src_url($src) {
 
 <script>
 	$(function() {
-		//$("#mtel").mask("+7 (999) 999 99 99");
-		$("#mtel").mask("+0000000000000");
+		$("#mtel").mask("+7 (999) 999 99 99");
+		//$("#mtel").mask("+0000000000000");
 	});
 </script>
