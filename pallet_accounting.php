@@ -370,8 +370,13 @@ while( $row = mysqli_fetch_array($res) ) {
 	<table style="font-size: 1.5em;">
 		<thead>
 			<tr>
-				<th>Наименование</th>
-				<th>Кол-во</th>
+				<th rowspan="2">Наименование</th>
+				<th colspan="3">Кол-во</th>
+			</tr>
+			<tr>
+				<th>На начало периода</th>
+				<th>На конец периода</th>
+				<th>Текущее</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -388,6 +393,33 @@ while( $row = mysqli_fetch_array($res) ) {
 				?>
 					<tr>
 						<td style="text-align: center;"><?=$row["pallet_name"]?></td>
+				<?php
+					$query = "
+						SELECT {$row["pn_balance"]}
+							- (SELECT IFNULL(SUM(pr_cnt - pr_reject), 0) FROM pallet__Return PR WHERE PR.pr_date >= '{$_GET["date_from"]}' AND PR.PN_ID = {$row["PN_ID"]})
+							- (SELECT IFNULL(SUM(pa_cnt - pa_reject), 0) FROM pallet__Arrival WHERE pa_date >= '{$_GET["date_from"]}' AND PS_ID IN (SELECT PS_ID FROM pallet__Supplier WHERE PN_ID = {$row["PN_ID"]}))
+							+ (SELECT IFNULL(SUM(pd_cnt), 0) FROM pallet__Disposal WHERE pd_date >= '{$_GET["date_from"]}'	AND PN_ID = {$row["PN_ID"]})
+							+ (SELECT IFNULL(SUM(pallets), 0) FROM list__Shipment WHERE ls_date >= '{$_GET["date_from"]}' AND PN_ID = {$row["PN_ID"]})
+							`cnt_start`
+					";
+					$subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+					$subrow = mysqli_fetch_array($subres);
+					$cnt_start = $subrow["cnt_start"];
+					echo "<td style='text-align: center;'>{$cnt_start}</td>";
+
+					$query = "
+						SELECT {$cnt_start}
+							+ (SELECT IFNULL(SUM(pr_cnt - pr_reject), 0) FROM pallet__Return PR WHERE PR.pr_date BETWEEN '{$_GET["date_from"]}' AND '{$_GET["date_to"]}' AND PR.PN_ID = {$row["PN_ID"]})
+							+ (SELECT IFNULL(SUM(pa_cnt - pa_reject), 0) FROM pallet__Arrival WHERE pa_date BETWEEN '{$_GET["date_from"]}' AND '{$_GET["date_to"]}' AND PS_ID IN (SELECT PS_ID FROM pallet__Supplier WHERE PN_ID = {$row["PN_ID"]}))
+							- (SELECT IFNULL(SUM(pd_cnt), 0) FROM pallet__Disposal WHERE pd_date BETWEEN '{$_GET["date_from"]}' AND '{$_GET["date_to"]}'	AND PN_ID = {$row["PN_ID"]})
+							- (SELECT IFNULL(SUM(pallets), 0) FROM list__Shipment WHERE ls_date BETWEEN '{$_GET["date_from"]}' AND '{$_GET["date_to"]}' AND PN_ID = {$row["PN_ID"]})
+							`cnt_end`
+					";
+					$subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+					$subrow = mysqli_fetch_array($subres);
+					$cnt_end = $subrow["cnt_end"];
+					echo "<td style='text-align: center;'>{$cnt_end}</td>";
+				?>
 						<td style="text-align: center;"><?=$row["pn_balance"]?></td>
 					</tr>
 				<?php
