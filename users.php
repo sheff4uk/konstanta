@@ -60,8 +60,8 @@ if( isset($_POST["USR_ID"]) ) {
 	if( $_POST["USR_ID"] == "add" ) {
 		$query = "
 			INSERT INTO Users
-			SET Surname = '{$Surname}'
-				,Name = '{$Name}'
+			SET Surname = CONCAT(UPPER(LEFT('{$Surname}', 1)), LOWER(SUBSTRING('{$Surname}', 2)))
+				,Name = CONCAT(UPPER(LEFT('{$Name}', 1)), LOWER(SUBSTRING('{$Name}', 2)))
 				,act = 1
 				,phone = {$phone}
 				,photo = {$photo}
@@ -98,8 +98,8 @@ if( isset($_POST["USR_ID"]) ) {
 
 		$query = "
 			UPDATE Users
-			SET Surname = '{$Surname}'
-				,Name = '{$Name}'
+			SET Surname = CONCAT(UPPER(LEFT('{$Name}', 1)), LOWER(SUBSTRING('{$Name}', 2)))
+				,Name = CONCAT(UPPER(LEFT('{$Name}', 1)), LOWER(SUBSTRING('{$Name}', 2)))
 				,act = {$act}
 				,phone = {$phone}
 				,photo = {$photo}
