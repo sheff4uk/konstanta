@@ -98,7 +98,7 @@ if( isset($_POST["USR_ID"]) ) {
 
 		$query = "
 			UPDATE Users
-			SET Surname = CONCAT(UPPER(LEFT('{$Name}', 1)), LOWER(SUBSTRING('{$Name}', 2)))
+			SET Surname = CONCAT(UPPER(LEFT('{$Surname}', 1)), LOWER(SUBSTRING('{$Surname}', 2)))
 				,Name = CONCAT(UPPER(LEFT('{$Name}', 1)), LOWER(SUBSTRING('{$Name}', 2)))
 				,act = {$act}
 				,phone = {$phone}
