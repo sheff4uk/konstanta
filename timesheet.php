@@ -2,7 +2,7 @@
 include "config.php";
 include "checkrights.php";
 
-// Сохранение/редактирование
+// Сохранение/редактирование тарифа
 if( isset($_POST["tariff"]) ) {
 	session_start();
 	$F_ID = $_POST["F_ID"];
@@ -94,6 +94,34 @@ if( isset($_POST["tariff"]) ) {
 	// Перенаправление в табель
 	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'&user_type='.$user_type.'">');
 }
+
+// Сохранение/редактирование официальной зарплаты
+if( isset($_POST["mon"]) ) {
+	session_start();
+	$F_ID = $_POST["F_ID"];
+	$month = $_POST["month"];
+	$user_type = $_POST["user_type"];
+	$USR_ID = $_POST["USR_ID"];
+	$salary1 = $_POST["salary1"] ? $_POST["salary1"] : "NULL";
+	$salary2 = $_POST["salary2"] ? $_POST["salary2"] : "NULL";
+	$year = $_POST["year"];
+	$mon = $_POST["mon"];
+
+	$query = "
+		UPDATE TariffMonth
+		SET salary1 = {$salary1}
+			,salary2 = {$salary2}
+		WHERE year = {$year}
+			AND month = {$mon}
+			AND USR_ID = {$USR_ID}
+			AND F_ID = {$F_ID}
+	";
+	mysqli_query( $mysqli, $query );
+
+	// Перенаправление в табель
+	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'&user_type='.$user_type.'">');
+}
+
 
 ///////////////////////
 // Сохранение файлов //
@@ -357,6 +385,7 @@ foreach ($_GET as &$value) {
 			<th colspan="2">[1...15]</th>
 			<th colspan="2">[16...<?=$days?>]</th>
 			<th colspan="2" style="font-size: 1.5em;">Σ</th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -371,6 +400,11 @@ foreach ($_GET as &$value) {
 		// Массив файлов
 		$UserAttachments = array();
 
+		$total_sigmapay1 = 0; // Сумма заработанных денег по всем работникам 1-15
+		$total_sigmapay2 = 0; // Сумма заработанных денег по всем работникам 16-30
+		$total_salary1 = 0; // Официальная часть по всем работникам 1-15
+		$total_salary2 = 0; // Официальная часть по всем работникам 16-30
+
 		// Получаем список работников
 		$query = "
 			SELECT USR.USR_ID
@@ -383,6 +417,8 @@ foreach ($_GET as &$value) {
 				,TST.valid_from
 				,TST.tariff
 				,TST.type
+				,IFNULL(TM.salary1, 0) salary1
+				,IFNULL(TM.salary2, 0) salary2
 			FROM Users USR
 			JOIN TariffMonth TM ON TM.year = {$year}
 				AND TM.month = {$month}
@@ -578,16 +614,35 @@ foreach ($_GET as &$value) {
 				}
 				$i++;
 			}
+			$sigmapay1 = $sigmapay1 - $row["salary1"];
+			$sigmapay2 = $sigmapay2 - $row["salary2"];
+
+			$total_salary1 += $row["salary1"];
+			$total_salary2 += $row["salary2"];
+			$total_sigmapay1 += ($sigmapay1 > 0 ? $sigmapay1 : 0);
+			$total_sigmapay2 += ($sigmapay2 > 0 ? $sigmapay2 : 0);
 
 			echo "
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright' colspan='2'>
+				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+					<n>".(number_format($row["salary1"], 0, '', ' '))."</n>
+				</td>
+				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($sigmapay1, 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright' colspan='2'>
+				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+					<n>".(number_format($row["salary2"], 0, '', ' '))."</n>
+				</td>
+				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($sigmapay2, 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright' colspan='2'>
+				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+					<n>".(number_format(($row["salary1"] + $row["salary2"]), 0, '', ' '))."</n>
+				</td>
+				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format(($sigmapay1 + $sigmapay2), 0, '', ' '))."</n>
+				</td>
+				<td class='txtright'>
+					<a href='#' class='salary_edit' USR_ID='{$row["USR_ID"]}' USR_Name='{$row["Name"]}' salary1='{$row["salary1"]}' salary2='{$row["salary2"]}' title='Редактировать'><i class='fa fa-pencil-alt fa-lg'></i></a>
 				</td>
 			";
 		}
@@ -597,20 +652,20 @@ foreach ($_GET as &$value) {
 		echo "<td colspan='2' class='nowrap' style='text-align: center; background: #3333;'><span><b>с</b> смена<br><b>ч</b> час-смена(от начала смены до регистрации выхода)<br><b>ч+</b> час-вход(от регистрации входа до регистрации выхода)<br><b>м</b> месяц(начисление происходит только в рабочие дни)</span></td>";
 
 		$i = 1;
-		$sigmapay1 = 0;
-		$sigmapay2 = 0;
+		// $sigmapay1 = 0;
+		// $sigmapay2 = 0;
 		while ($i <= $days) {
 			echo "<td style='padding: 0px; text-align: center; background: #3333;'>";
 			if( $daypay[$i] != 0 ) {
 				echo "<b>".(number_format($daypay[$i], 0, '', ' '))."</b>";
 				echo "<br><n>x{$daycnt[$i]}</n>";
 
-				if( $i < 16 ) {
-					$sigmapay1 += $daypay[$i];
-				}
-				else {
-					$sigmapay2 += $daypay[$i];
-				}
+				// if( $i < 16 ) {
+				// 	$sigmapay1 += $daypay[$i];
+				// }
+				// else {
+				// 	$sigmapay2 += $daypay[$i];
+				// }
 
 				if( $subrow = mysqli_fetch_array($subres) ) {
 					$day = $subrow["Day"];
@@ -620,15 +675,25 @@ foreach ($_GET as &$value) {
 			$i++;
 		}
 		echo "
-			<td style='font-weight: bold; background: #3333;' class='txtright' colspan='2'>
-				<n>".(number_format($sigmapay1, 0, '', ' '))."</n>
+			<td style='font-weight: bold; background: #3333;' class='txtright'>
+				<n>".(number_format($total_salary1, 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright' colspan='2'>
-				<n>".(number_format($sigmapay2, 0, '', ' '))."</n>
+			<td style='font-weight: bold; background: #3333;' class='txtright'>
+				<n>".(number_format($total_sigmapay1, 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright' colspan='2'>
-				<n>".(number_format(($sigmapay1 + $sigmapay2), 0, '', ' '))."</n>
+			<td style='font-weight: bold; background: #3333;' class='txtright'>
+				<n>".(number_format($total_salary2, 0, '', ' '))."</n>
 			</td>
+			<td style='font-weight: bold; background: #3333;' class='txtright'>
+				<n>".(number_format($total_sigmapay2, 0, '', ' '))."</n>
+			</td>
+			<td style='font-weight: bold; background: #3333;' class='txtright'>
+				<n>".(number_format(($total_salary1 + $total_salary2), 0, '', ' '))."</n>
+			</td>
+			<td style='font-weight: bold; background: #3333;' class='txtright'>
+				<n>".(number_format(($total_sigmapay1 + $total_sigmapay2), 0, '', ' '))."</n>
+			</td>
+			<td></td>
 		";
 		echo "</tr>";
 
@@ -707,6 +772,38 @@ foreach ($_GET as &$value) {
 		<div>
 			<hr>
 			<input type='submit' name="subbut" value='Загрузить' style='float: right;'>
+		</div>
+	</form>
+</div>
+
+<div id='salary_form' class="addproduct" style='display:none;'>
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
+		<fieldset>
+			<input type="hidden" name="F_ID" value="<?=$F_ID?>">
+			<input type="hidden" name="month" value="<?=$_GET["month"]?>">
+			<input type="hidden" name="user_type" value="<?=$user_type?>">
+			<input type="hidden" name="USR_ID">
+			<input type="hidden" name="year" value="<?=$year?>">
+			<input type="hidden" name="mon" value="<?=$month?>">
+
+			<table>
+				<thead>
+					<tr>
+						<th>1..15</th>
+						<th>16..30</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input type="number" name="salary1" min="0" style="width: 100px;"></td>
+						<td><input type="number" name="salary2" min="0" style="width: 100px;"></td>
+					</tr>
+				</tbody>
+			</table>
+		</fieldset>
+		<div>
+			<hr>
+			<input type='submit' name="subbut" value='Записать' style='float: right;'>
 		</div>
 	</form>
 </div>
@@ -790,6 +887,31 @@ foreach ($_GET as &$value) {
 				title: 'Файлы | '+name,
 				resizable: false,
 				width: 650,
+				modal: true,
+				closeText: 'Закрыть'
+			});
+
+			return false;
+		});
+
+		// Редактирование официальной зарплаты
+		$('.salary_edit').click( function() {
+			// Проверяем сессию
+			$.ajax({ url: "check_session.php?script=1", dataType: "script", async: false });
+
+			var salary1 = $(this).attr('salary1'),
+				salary2 = $(this).attr('salary2'),
+				USR_ID = $(this).attr('USR_ID'),
+				USR_Name = $(this).attr('USR_Name');
+
+			$('#salary_form input[name="salary1"]').val(salary1);
+			$('#salary_form input[name="salary2"]').val(salary2);
+			$('#salary_form input[name="USR_ID"]').val(USR_ID);
+
+			$('#salary_form').dialog({
+				title: USR_Name,
+				resizable: false,
+				width: 600,
 				modal: true,
 				closeText: 'Закрыть'
 			});
