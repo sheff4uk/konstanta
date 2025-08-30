@@ -789,8 +789,8 @@ foreach ($_GET as &$value) {
 			<table>
 				<thead>
 					<tr>
-						<th>1..15</th>
-						<th>16..30</th>
+						<th>[1...15]</th>
+						<th>[16...<?=$days?>]</th>
 					</tr>
 				</thead>
 				<tbody>
