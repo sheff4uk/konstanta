@@ -345,7 +345,7 @@ foreach ($_GET as &$value) {
 	});
 </script>
 
-<table id="timesheet" class="main_table">
+<table id="timesheet" class="main_table" style="width: 2200px;">
 	<thead>
 		<tr class="nowrap">
 			<th colspan="2">Работник</th>
@@ -382,9 +382,9 @@ foreach ($_GET as &$value) {
 				}
 			?>
 
-			<th colspan="2">[1...15]</th>
-			<th colspan="2">[16...<?=$days?>]</th>
-			<th colspan="2" style="font-size: 1.5em;">Σ</th>
+			<th colspan="4">[1...15]</th>
+			<th colspan="4">[16...<?=$days?>]</th>
+			<th colspan="4" style="font-size: 1.5em;">Σ</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -623,22 +623,22 @@ foreach ($_GET as &$value) {
 			$total_sigmapay2 += ($sigmapay2 > 0 ? $sigmapay2 : 0);
 
 			echo "
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td colspan='2' style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($row["salary1"], 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td colspan='2' style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($sigmapay1, 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td colspan='2' style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($row["salary2"], 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td colspan='2' style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($sigmapay2, 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td colspan='2' style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format(($row["salary1"] + $row["salary2"]), 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td colspan='2' style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format(($sigmapay1 + $sigmapay2), 0, '', ' '))."</n>
 				</td>
 				<td class='txtright'>
@@ -675,22 +675,22 @@ foreach ($_GET as &$value) {
 			$i++;
 		}
 		echo "
-			<td style='font-weight: bold; background: #3333;' class='txtright'>
+			<td colspan='2' style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format($total_salary1, 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright'>
+			<td colspan='2' style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format($total_sigmapay1, 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright'>
+			<td colspan='2' style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format($total_salary2, 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright'>
+			<td colspan='2' style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format($total_sigmapay2, 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright'>
+			<td colspan='2' style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format(($total_salary1 + $total_salary2), 0, '', ' '))."</n>
 			</td>
-			<td style='font-weight: bold; background: #3333;' class='txtright'>
+			<td colspan='2' style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format(($total_sigmapay1 + $total_sigmapay2), 0, '', ' '))."</n>
 			</td>
 			<td></td>
