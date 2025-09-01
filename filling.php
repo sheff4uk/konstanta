@@ -183,7 +183,7 @@ foreach ($_GET as &$value) {
 					JOIN list__Batch LB ON LB.PB_ID = PB.PB_ID
 					JOIN list__BatchMaterial LBM ON LBM.LB_ID = LB.LB_ID
 					JOIN material__Name MN ON MN.MN_ID = LBM.MN_ID
-					WHERE LBM.quantity
+					WHERE 1
 						AND PB.F_ID = {$_GET["F_ID"]}
 						AND PB.PB_ID IN (SELECT PB_ID FROM list__Batch WHERE YEARWEEK(batch_date, 1) LIKE '{$_GET["week"]}' GROUP BY PB_ID)
 						".($_GET["CW_ID"] ? "AND PB.CW_ID={$_GET["CW_ID"]}" : "")."
