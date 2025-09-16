@@ -616,11 +616,13 @@ foreach ($_GET as &$value) {
 			}
 			$sigmapay1 = $sigmapay1 - $row["salary1"];
 			$sigmapay2 = $sigmapay2 - $row["salary2"] + ($sigmapay1 < 0 ? $sigmapay1 : 0) ;
+			$sigmapay = ( $sigmapay1 - $row["salary1"] ) + ( $sigmapay2 - $row["salary2"] );
 
 			$total_salary1 += $row["salary1"];
 			$total_salary2 += $row["salary2"];
 			$total_sigmapay1 += ($sigmapay1 > 0 ? $sigmapay1 : 0);
 			$total_sigmapay2 += ($sigmapay2 > 0 ? $sigmapay2 : 0);
+			$total_sigmapay += ($sigmapay > 0 ? $sigmapay : 0);
 
 			echo "
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
@@ -639,7 +641,7 @@ foreach ($_GET as &$value) {
 					<n>".(number_format(($row["salary1"] + $row["salary2"]), 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
-					<n>".(number_format(($sigmapay1 + $sigmapay2), 0, '', ' '))."</n>
+					<n>".(number_format(($sigmapay), 0, '', ' '))."</n>
 				</td>
 				<td class='txtright'>
 					<a href='#' class='salary_edit' USR_ID='{$row["USR_ID"]}' USR_Name='{$row["Name"]}' salary1='{$row["salary1"]}' salary2='{$row["salary2"]}' title='Редактировать'><i class='fa fa-pencil-alt fa-lg'></i></a>
@@ -691,7 +693,7 @@ foreach ($_GET as &$value) {
 				<n>".(number_format(($total_salary1 + $total_salary2), 0, '', ' '))."</n>
 			</td>
 			<td style='font-weight: bold; background: #3333;' class='txtright'>
-				<n>".(number_format(($total_sigmapay1 + $total_sigmapay2), 0, '', ' '))."</n>
+				<n>".(number_format(($total_sigmapay), 0, '', ' '))."</n>
 			</td>
 			<td></td>
 		";
