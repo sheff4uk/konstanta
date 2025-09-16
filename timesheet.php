@@ -614,9 +614,9 @@ foreach ($_GET as &$value) {
 				}
 				$i++;
 			}
+			$sigmapay = ( $sigmapay1 - $row["salary1"] ) + ( $sigmapay2 - $row["salary2"] );
 			$sigmapay1 = $sigmapay1 - $row["salary1"];
 			$sigmapay2 = $sigmapay2 - $row["salary2"] + ($sigmapay1 < 0 ? $sigmapay1 : 0) ;
-			$sigmapay = ( $sigmapay1 - $row["salary1"] ) + ( $sigmapay2 - $row["salary2"] );
 
 			$total_salary1 += $row["salary1"];
 			$total_salary2 += $row["salary2"];
