@@ -11,14 +11,14 @@ if( isset($_POST["F_ID"]) ) {
 
 	if( isset($_POST["TS_ID"]) ) {
 		$TS_ID = $_POST["TS_ID"];
-		// Узнаем ts_date, USD_ID
+		// Узнаем ts_date, USR_ID
 		$query = "
 			SELECT TS.ts_date
 				,USR_ID
 			FROM Timesheet TS
 			WHERE TS.TS_ID = {$TS_ID}
 		";
-		$res = mysqli_query( $mysqli, $query );
+		$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 		$row = mysqli_fetch_array($res);
 		$ts_date = $row["ts_date"];
 		$USR_ID = $row["USR_ID"];
@@ -34,7 +34,7 @@ if( isset($_POST["F_ID"]) ) {
 					,USR_ID = {$USR_ID}
 					,F_ID = {$F_ID}
 			";
-			mysqli_query( $mysqli, $query );
+			mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 			$TS_ID = mysqli_insert_id( $mysqli );
 		}
 	}
@@ -48,18 +48,22 @@ if( isset($_POST["F_ID"]) ) {
 				,tss_author = {$_SESSION['id']}
 			WHERE TSS_ID = {$key}
 		";
-		mysqli_query( $mysqli, $query );
+		mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 	}
 
-	// Проверка можно ли редактировать регистрации
-	$query = "
-		SELECT IF(TIMESTAMPDIFF(DAY, TS.ts_date, CURDATE()) <= 40 AND TIMESTAMPDIFF(HOUR, TS.ts_date, NOW()) >= 32, 1, 0) editable
-		FROM Timesheet TS
-		WHERE TS.TS_ID = {$TS_ID}
-	";
-	$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
-	$row = mysqli_fetch_array($res);
-	$editable = $row["editable"];
+	if( $TS_ID ) {
+		// Проверка можно ли редактировать регистрации
+		$query = "
+			SELECT IF(TIMESTAMPDIFF(DAY, TS.ts_date, CURDATE()) <= 40 AND TIMESTAMPDIFF(HOUR, TS.ts_date, NOW()) >= 32, 1, 0) editable
+			FROM Timesheet TS
+			WHERE TS.TS_ID = {$TS_ID}
+		";
+		$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+		$row = mysqli_fetch_array($res);
+		$editable = $row["editable"];
+	}
+	else $editable = "0";
+	
 	if( $editable ) {
 		//////////////////////////////////////////////////
 		// Проверяем валидность добавленных регистраций //
@@ -268,21 +272,15 @@ if( isset($_POST["F_ID"]) ) {
 			}
 		}
 		//////////////////////////////
+		if( in_array('ts_approved', $Rights) ) {
+			$query = "
+				UPDATE TimesheetShift
+				SET approved = IF(approved = 0, 1, approved)
+				WHERE TS_ID = {$TS_ID}
+			";
+			mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+		}
 	}
-
-	////////////////////////////////////
-	// Помечаем удаленные регистрации //
-	////////////////////////////////////
-	foreach ($_POST["del_reg"] as $key => $value) {
-		$query = "
-			UPDATE TimeReg
-			SET del_time = NOW()
-				,del_author = {$_SESSION['id']}
-			WHERE TR_ID = {$value}
-		";
-		mysqli_query( $mysqli, $query );
-	}
-	/////////////////////////////////////
 
 	//////////////////////
 	// Обновляем статус //
@@ -295,7 +293,7 @@ if( isset($_POST["F_ID"]) ) {
 				,fine = IF({$status} = 5, 5000, NULL)
 			WHERE TS_ID = {$TS_ID}
 		";
-		mysqli_query( $mysqli, $query );
+		mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 	}
 	///////////////////////////////////
 
@@ -312,7 +310,7 @@ if( isset($_POST["F_ID"]) ) {
 				,comment = '{$comment}'
 			WHERE TS_ID = {$TS_ID}
 		";
-		mysqli_query( $mysqli, $query );
+		mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 	}
 	///////////////////////////////////
 
@@ -402,7 +400,7 @@ if( isset($_POST["F_ID"]) ) {
 		</fieldset>
 		<div>
 			<hr>
-			<input type='submit' name="subbut" value='Записать' style='float: right;'>
+			<input type='submit' name="subbut">
 		</div>
 	</form>
 </div>
@@ -416,6 +414,10 @@ if( isset($_POST["F_ID"]) ) {
 			$('#timesheet_form select[name=status]').val('');
 			$('#timesheet_form input[name=payout]').val('');
 			$('#timesheet_form input[name=comment]').val('');
+
+			$('#timesheet_form input[type=submit]').val("Записать");
+			$('#timesheet_form input[type=submit]').removeAttr("style");
+			$('#timesheet_form input[type=submit]').css("float", "right");
 
 			var ts_id = $(this).attr('ts_id'),
 				date_format = $(this).attr('date_format'),
@@ -436,8 +438,19 @@ if( isset($_POST["F_ID"]) ) {
 				var status = $(this).attr('status'),
 					photo = $(this).attr('photo'),
 					payout = $(this).attr('payout'),
-					comment = $(this).attr('comment');
+					comment = $(this).attr('comment'),
+					approved = $(this).attr('approved');
 
+				<?php
+				if( in_array('ts_approved', $Rights) ) {
+					echo "
+						if( approved == '0' ) {
+							$('#timesheet_form input[type=submit]').val('Одобрить');
+							$('#timesheet_form input[type=submit]').css('background', 'red');
+						}
+					";
+				}
+				?>
 				$('#timesheet_form select[name=status]').val(status);
 				$('#timesheet_form input[name=payout]').val(payout);
 				$('#timesheet_form input[name=comment]').val(comment);
@@ -466,8 +479,11 @@ if( isset($_POST["F_ID"]) ) {
 							+ "</select>"
 							+ (val["last_edit"] ? val["tss_author"] + "<i class='fas fa-clock fa-lg' title='" + val["last_edit"] + "'></i>" : '')
 							+ "<br>";
-						duration = duration + val["duration_hm"] + "<br>";
-						pay = pay + val["pay"] + "<br>";
+						duration = duration
+							+ val["duration_hm"]
+							+ (val["add_time"] ? " <span style='font-size: 14px;'>" + val["add_author"] + "<i class='fas fa-clock fa-lg' title='" + val["add_time"] + "'></i></span>" : '')
+							+ "<br>";
+						pay = pay + "<span style='" + (val["approved"] == "0" ? 'background: #f006; ' : '') + "padding: 5px; border-radius: 10px;'>" + val["pay"] + "</span><br>";
 
 					});
 
@@ -477,14 +493,14 @@ if( isset($_POST["F_ID"]) ) {
 								+ "<th></th>"
 								+ "<th>Смена</th>"
 								+ "<th colspan='3'>Тариф</th>"
-								+"<th>Длительность</th>"
-								+"<th>Расчет</th>"
+								+ "<th colspan='2'>Длительность</th>"
+								+ "<th>Расчет</th>"
 							+"</tr></thead>"
 							+"<tbody style='text-align: center; font-size: 1.3em;'><tr>"
 								+ "<td>" + html_photo + "</td>"
 								+ "<td>" + shift_num + "</td>"
 								+ "<td colspan='3' style='font-size: 14px; text-align: left;'>" + tariff_type + "</td>"
-								+ "<td>" + duration + "</td>"
+								+ "<td colspan='2'>" + duration + "</td>"
 								+ "<td>" + pay + "</td>"
 							+ "</tr></tbody>"
 						+ "</table>";
@@ -554,15 +570,6 @@ if( isset($_POST["F_ID"]) ) {
 			var def = $(this).attr('def');
 				border = ($(this).val() != '') ? $(this).val() : def;
 			$('#timereg input[name=tr_time1]').attr('max', border);
-		});
-
-		$('#timesheet_form tbody').on('change', '.del_reg', function(event) {
-			if( $(this).is(":checked") ) {
-				$(this).parents('td').css('background', '#f005');
-			}
-			else {
-				$(this).parents('td').css('background', 'none');
-			}
 		});
 	});
 </script>

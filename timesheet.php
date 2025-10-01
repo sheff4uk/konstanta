@@ -522,10 +522,10 @@ foreach ($_GET as &$value) {
 				$d = str_pad($i, 2, "0", STR_PAD_LEFT);
 
 				if( $i == $day ) {
-					$man_reg = 0;
 					$duration_hm_title = "";
 					$pay_format = "";
 					$pay = null;
+					$approved = null;
 
 					// Заполняем массив расчета смен
 					$query = "
@@ -533,24 +533,30 @@ foreach ($_GET as &$value) {
 							,TSS.shift_num
 							,TSS.tss_tariff
 							,TSS.tss_type
-							,CONCAT( TSS.duration DIV 60, ':', LPAD(TSS.duration % 60, 2, '0')) duration_hm
+							,CONCAT( TSS.duration DIV 60, 'ч ', LPAD(TSS.duration % 60, 2, '0'), 'м') duration_hm
+							,(SELECT DATE_FORMAT(add_time, '%d.%m.%Y в %H:%i:%s') FROM TimeReg WHERE TSS_ID = TSS.TSS_ID AND del_time IS NULL AND add_author IS NOT NULL ORDER BY add_time DESC LIMIT 1) add_time
+    						,(SELECT USR_Icon(add_author) FROM TimeReg WHERE TSS_ID = TSS.TSS_ID AND del_time IS NULL AND add_author IS NOT NULL ORDER BY add_time DESC LIMIT 1) add_author
 							,TSS.pay
 							,USR_Icon(TSS.tss_author) tss_author
 							,DATE_FORMAT(TSS.last_edit, '%d.%m.%Y в %H:%i:%s') last_edit
-							,CONCAT('&#1012', (TSS.shift_num+1), ';', TSS.duration DIV 60, ':', LPAD(TSS.duration % 60, 2, '0')) duration_hm_title
+							,CONCAT('&#1012', (TSS.shift_num+1), '; ', TSS.duration DIV 60, 'ч ', LPAD(TSS.duration % 60, 2, '0'), 'м') duration_hm_title
+							,TSS.approved
 						FROM TimesheetShift TSS
 						WHERE TSS.TS_ID = {$subrow["TS_ID"]}
 					";
 					$subsubres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 					while( $subsubrow = mysqli_fetch_array($subsubres) ) {
-						$TimesheetShift[$subrow["TS_ID"]][] = array("TSS_ID" => $subsubrow["TSS_ID"], "shift_num" => $subsubrow["shift_num"], "tss_tariff" => $subsubrow["tss_tariff"], "tss_type" => "{$subsubrow["tss_type"]}", "duration_hm" => "{$subsubrow["duration_hm"]}", "pay" => "{$subsubrow["pay"]}", "tss_author" => "{$subsubrow["tss_author"]}", "last_edit" => "{$subsubrow["last_edit"]}");
-						if( $subsubrow["last_edit"] != null ) {
-							$man_reg = 1;
+						$TimesheetShift[$subrow["TS_ID"]][] = array("TSS_ID" => $subsubrow["TSS_ID"], "shift_num" => $subsubrow["shift_num"], "tss_tariff" => $subsubrow["tss_tariff"], "tss_type" => "{$subsubrow["tss_type"]}", "duration_hm" => "{$subsubrow["duration_hm"]}", "add_time" => "{$subsubrow["add_time"]}", "add_author" => "{$subsubrow["add_author"]}", "pay" => "{$subsubrow["pay"]}", "tss_author" => "{$subsubrow["tss_author"]}", "last_edit" => "{$subsubrow["last_edit"]}", "approved" => "{$subsubrow["approved"]}");
+						
+						if( ($approved == null and $subsubrow["approved"] != null) or ($approved == "1" and $subsubrow["approved"] == "0") ){
+							$approved = $subsubrow["approved"];
 						}
 
 						$duration_hm_title .= "{$subsubrow["duration_hm_title"]}&emsp;";
-						$pay_format .= "{$subsubrow["pay"]}<br>";
-						$pay += $subsubrow["pay"];
+						$pay_format .= "<span".($subsubrow["approved"] == "0" ? " style='opacity: .5;'" : "").">{$subsubrow["pay"]}</span><br>";
+						if( $subsubrow["approved"] != "0" ) {
+							$pay += $subsubrow["pay"];
+						}
 					}
 
 					// Заполняем массив регистраций
@@ -561,9 +567,9 @@ foreach ($_GET as &$value) {
 							,CONCAT(LPAD((TR.tr_minute DIV 60) % 24, 2, '0'), ':', LPAD(TR.tr_minute % 60, 2, '0')) tr_time
 							,TR.tr_photo
 							,CONCAT(Friendly_date(TR.add_time), '<br>', DATE_FORMAT(TR.add_time, '%H:%i:%s')) add_time
-							,IF(TR.add_author IS NOT NULL, USR_Icon(TR.add_author), '') add_author
+							,IF(TR.add_author IS NOT NULL, USR_Icon(TR.add_author), NULL) add_author
 							,CONCAT(Friendly_date(TR.del_time), '<br>', DATE_FORMAT(TR.del_time, '%H:%i:%s')) del_time
-							,IF(TR.del_author IS NOT NULL, USR_Icon(TR.del_author), '') del_author
+							,IF(TR.del_author IS NOT NULL, USR_Icon(TR.del_author), NULL) del_author
 						FROM TimeReg TR
 						JOIN TimesheetShift TSS ON TSS.TSS_ID = TR.TSS_ID
 						WHERE TSS.TS_ID = {$subrow["TS_ID"]}
@@ -572,14 +578,12 @@ foreach ($_GET as &$value) {
 					$subsubres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 					while( $subsubrow = mysqli_fetch_array($subsubres) ) {
 						$TimeReg[$subrow["TS_ID"]][] = array("TR_ID" => $subsubrow["TR_ID"], "shift_num" => $subsubrow["shift_num"], "prefix" => $subsubrow["prefix"], "tr_time" => "{$subsubrow["tr_time"]}", "tr_photo" => "{$subsubrow["tr_photo"]}", "add_time" => "{$subsubrow["add_time"]}", "add_author" => "{$subsubrow["add_author"]}", "del_time" => "{$subsubrow["del_time"]}", "del_author" => "{$subsubrow["del_author"]}");
-						if( $subsubrow["add_time"] != null ) {
-							$man_reg = 1;
-						}
 					}
 
 					echo "
-						<td title='{$duration_hm_title}' id='{$subrow["TS_ID"]}' style='font-size: .9em; overflow: visible; padding: 0px; text-align: center;".(isset($holidays[$i]) ? " background: #09f3;" : "").($pay == '0' ? " background: #f006;" : "")."' class='tscell nowrap' ts_id='{$subrow["TS_ID"]}' date_format='{$d}.{$month}.{$year}' date='{$subrow["ts_date"]}' tomorrow='{$subrow["tomorrow"]}' editable='{$subrow["editable"]}' usr_name='{$row["Name"]}' photo='{$row["photo"]}' status='{$subrow["status"]}' payout='{$subrow["payout"]}' comment='{$subrow["comment"]}'>
-							".($man_reg ? "<div style='position: absolute; top: 0px; left: 0px; width: 5px; height: 5px; border-radius: 0 0 5px 0; background: red; box-shadow: 0 0 1px 1px red;'></div>" : "")."
+						<td title='{$duration_hm_title}' id='{$subrow["TS_ID"]}' style='font-size: .9em; overflow: visible; padding: 0px; text-align: center;".(isset($holidays[$i]) ? " background: #09f3;" : "").($pay == '0' ? " background: #f006;" : "")."' class='tscell nowrap' ts_id='{$subrow["TS_ID"]}' date_format='{$d}.{$month}.{$year}' date='{$subrow["ts_date"]}' tomorrow='{$subrow["tomorrow"]}' editable='{$subrow["editable"]}' usr_name='{$row["Name"]}' photo='{$row["photo"]}' status='{$subrow["status"]}' payout='{$subrow["payout"]}' comment='{$subrow["comment"]}' approved='{$approved}'>
+							".($approved == "0" ? "<div style='position: absolute; top: 0px; left: 0px; width: 5px; height: 5px; border-radius: 0 0 5px 0; background: red; box-shadow: 0 0 1px 1px red;'></div>" : "")."
+							".($approved == "1" ? "<div style='position: absolute; top: 0px; left: 0px; width: 5px; height: 5px; background: green; box-shadow: 0 0 1px 1px green;'></div>" : "")."
 							<div>{$pay_format}</div>
 							".($subrow["payout"] ? "<div style='color: red;' title='{$subrow["comment"]}'>-{$subrow["payout"]}</div>" : "")."
 							".($subrow["fine"] ? "<div style='color: red;'>-{$subrow["fine"]}</div>" : "")."
