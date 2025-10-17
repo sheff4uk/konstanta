@@ -404,6 +404,7 @@ foreach ($_GET as &$value) {
 		$total_sigmapay2 = 0; // Сумма заработанных денег по всем работникам 16-30
 		$total_salary1 = 0; // Официальная часть по всем работникам 1-15
 		$total_salary2 = 0; // Официальная часть по всем работникам 16-30
+		$usr_cnt = 0; // Счетчик работников
 
 		// Получаем список работников
 		$query = "
@@ -651,10 +652,12 @@ foreach ($_GET as &$value) {
 					<a href='#' class='salary_edit' USR_ID='{$row["USR_ID"]}' USR_Name='{$row["Name"]}' salary1='{$row["salary1"]}' salary2='{$row["salary2"]}' title='Редактировать'><i class='fa fa-pencil-alt fa-lg'></i></a>
 				</td>
 			";
+
+			$usr_cnt++;
 		}
 
 		// Итог снизу
-		echo "<tr><td colspan='2' style='text-align: center; font-size: 1.5em; background: #3333;'><b>Σ</b></td>";
+		echo "<tr><td colspan='2' style='text-align: center; font-size: 1.5em; background: #3333;'><b><i class='fa-solid fa-user'></i>x{$usr_cnt}</b></td>";
 		echo "<td colspan='2' class='nowrap' style='text-align: center; background: #3333;'><span><b>с</b> смена<br><b>ч</b> час-смена(от начала смены до регистрации выхода)<br><b>ч+</b> час-вход(от регистрации входа до регистрации выхода)<br><b>м</b> месяц(начисление происходит только в рабочие дни)</span></td>";
 
 		$i = 1;

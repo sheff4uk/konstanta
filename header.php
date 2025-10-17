@@ -257,7 +257,7 @@ function src_url($src) {
 			$menu["Учет"]["<i class='fas fa-sign-language fa-lg'></i> СИЗ/расходники"] = "overal_accounting.php";
 		}
 		if( in_array('users', $Rights) ) {
-			$menu["<i class='fas fa-cog fa-lg'></i>"]["Пользователи"] = "users.php";
+			$menu["<i class='fas fa-cog fa-lg'></i>"]["<i class='fa-solid fa-user'></i> Пользователи"] = "users.php";
 		}
 		if( in_array('mix_formula', $Rights) ) {
 			$menu["<i class='fas fa-cog fa-lg'></i>"]["Рецепты"] = "mix_formula.php";
