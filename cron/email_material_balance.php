@@ -66,7 +66,7 @@ $res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $
 while( $row = mysqli_fetch_array($res) ) {
 
     $query = "
-        SELECT ROUND(SUM(LBM.quantity) * MN.adjustment / 30000, 2) dayly_avg
+        SELECT ROUND(SUM(LBM.quantity) / 30000, 2) dayly_avg
         FROM material__Name MN
         LEFT JOIN list__BatchMaterial LBM ON LBM.MN_ID = MN.MN_ID
             AND LBM.LB_ID IN (
@@ -83,7 +83,7 @@ while( $row = mysqli_fetch_array($res) ) {
     $dayly_avg = $subrow["dayly_avg"];
 
     $query = "
-        SELECT ROUND(SUM(LBM.quantity) * MN.adjustment / 12000, 2) weekly_avg
+        SELECT ROUND(SUM(LBM.quantity) / 12000, 2) weekly_avg
         FROM material__Name MN
         LEFT JOIN list__BatchMaterial LBM ON LBM.MN_ID = MN.MN_ID
             AND LBM.LB_ID IN (

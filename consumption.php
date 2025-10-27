@@ -228,7 +228,7 @@ foreach ($_GET as &$value) {
 				<td><?=round($row["details"] * $row["drawing_volume"] / 1000, 3)?></td>
 			<?php
 			$query = "
-				SELECT SUM(LBM.quantity) * MN.adjustment quantity
+				SELECT SUM(LBM.quantity) quantity
 					,MN.color
 				FROM material__Name MN
 				LEFT JOIN list__BatchMaterial LBM ON LBM.MN_ID = MN.MN_ID

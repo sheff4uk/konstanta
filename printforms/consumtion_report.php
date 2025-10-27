@@ -168,7 +168,7 @@ echo "<title>Расход сырья {$date_format}</title>";
 				<td><?=$row["details"]?></td>
 			<?php
 			$query = "
-				SELECT SUM(LBM.quantity) * MN.adjustment quantity
+				SELECT SUM(LBM.quantity) quantity
 				FROM material__Name MN
 				LEFT JOIN list__BatchMaterial LBM ON LBM.MN_ID = MN.MN_ID
 					AND LBM.LB_ID IN (
