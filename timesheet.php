@@ -420,6 +420,8 @@ foreach ($_GET as &$value) {
 				,TST.type
 				,IFNULL(TM.salary1, 0) salary1
 				,IFNULL(TM.salary2, 0) salary2
+				,IFNULL(TM.cash1, 0) cash1
+				,IFNULL(TM.cash2, 0) cash2
 			FROM Users USR
 			JOIN TariffMonth TM ON TM.year = {$year}
 				AND TM.month = {$month}
@@ -633,13 +635,13 @@ foreach ($_GET as &$value) {
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($row["salary1"], 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td style='overflow: visible; font-weight: bold; background: ".($row["cash1"] ? '#0f03' : '#3333').";' class='txtright'>
 					<n>".(number_format($sigmapay1, 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($row["salary2"], 0, '', ' '))."</n>
 				</td>
-				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+				<td style='overflow: visible; font-weight: bold; background: ".($row["cash2"] ? '#0f03' : '#3333').";' class='txtright'>
 					<n>".(number_format($sigmapay2, 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>

@@ -3,7 +3,7 @@ include_once "../config.php";
 include_once "../checkrights.php";
 
 // Сохранение/редактирование
-if( isset($_POST["F_ID"]) ) {
+if( isset($_POST["status"]) ) {
 	session_start();
 	$F_ID = $_POST["F_ID"];
 	$month = $_POST["month"];
@@ -321,6 +321,34 @@ if( isset($_POST["F_ID"]) ) {
 	// Перенаправление в табель
 	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'&user_type='.$user_type.'#'.$TS_ID.'">');
 }
+
+// Сохранение/редактирование
+if( isset($_POST["cardcode"]) ) {
+	session_start();
+	$F_ID = $_POST["F_ID"];
+	$month = $_POST["month"];
+
+	if( $_POST["cardcode"] == $_POST["confirm_cardcode"] ) {
+		// По номеру карты находим пользователя
+		$query = "
+			UPDATE TariffMonth
+			SET cash2 = {$_POST["payment"]}
+			WHERE year = {$_POST["ye"]}
+				AND month = {$_POST["mn"]}
+				AND USR_ID = {$_POST["USR_ID"]}
+				AND F_ID = {$_POST["F_ID"]}
+		";
+		$res = mysqli_query( $mysqli, $query );
+
+		$_SESSION["success"][] = "Карта подтверждена.";
+	}
+	else {
+		$_SESSION["error"][] = "Карта не подтверждена.";
+	}
+
+	// Перенаправление в табель
+	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'">');
+}
 ?>
 
 <style>
@@ -405,6 +433,21 @@ if( isset($_POST["F_ID"]) ) {
 	</form>
 </div>
 
+
+<div id='salary_payment_form' style='display:none;'>
+	<form method='post' action="/forms/timesheet_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
+		<input type="hidden" name="F_ID" value="<?=$F_ID?>">
+		<input type="hidden" name="month" value="<?=$_GET["month"]?>">
+		<input type="hidden" name="cardcode">
+		
+		<fieldset>
+			<!-- Содержимое формы аяксом -->
+		</fieldset>
+
+		<input type="hidden" name="confirm_cardcode">
+		<input type="submit" name="subbut" style="display: none;">
+	</form>
+</div>
 <script>
 	$(function() {
 		$('.tscell').on('click', function(){
@@ -571,5 +614,61 @@ if( isset($_POST["F_ID"]) ) {
 				border = ($(this).val() != '') ? $(this).val() : def;
 			$('#timereg input[name=tr_time1]').attr('max', border);
 		});
+
+		// Функция открытия формы выдачи зарплаты
+		function salary_payment_form(cardcode) {
+			// Проверяем сессию
+			$.ajax({ url: "check_session.php?script=1", dataType: "script", async: false });
+
+			$("#salary_payment_form input[name=cardcode]").val(cardcode);
+
+			//Рисуем форму
+			$.ajax({ url: "/ajax/salary_payment_form_ajax.php?cardcode="+cardcode+"&F_ID=<?=$F_ID?>", dataType: "script", async: false });
+
+			$('#salary_payment_form').dialog({
+				resizable: false,
+				width: 1000,
+				modal: true,
+				closeText: 'Закрыть',
+				close: function() {
+					form_is_open = 0;
+				}
+			});
+
+			return false;
+		}
+
+		// Считывание карточки
+		var cardcode = "",
+			form_is_open = 0;
+		$(document).keydown(function(e)
+		{
+			var code = (e.keyCode ? e.keyCode : e.which);
+			if (code==0) cardcode = "";
+			if( code==13 || code==9 )// Enter key hit. Tab key hit.
+			{
+				console.log(cardcode);
+				if( cardcode.length == 10 ) {
+					if( form_is_open == 0 ) {
+						salary_payment_form(cardcode);
+						form_is_open = 1;
+					}
+					else {
+						$("#salary_payment_form input[name=confirm_cardcode]").val(cardcode);
+						$("#salary_payment_form input[name=subbut]").click();
+					}
+					cardcode="";
+					return false;
+				}
+				cardcode = "";
+			}
+			else
+			{
+				if (code >= 48 && code <= 57) {
+					cardcode=cardcode+String.fromCharCode(code);
+				}
+			}
+		});
+
 	});
 </script>
