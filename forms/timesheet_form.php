@@ -322,7 +322,7 @@ if( isset($_POST["status"]) ) {
 	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'&user_type='.$user_type.'#'.$TS_ID.'">');
 }
 
-// Сохранение/редактирование
+// Подтверждение выдачи зарплаты
 if( isset($_POST["cardcode"]) ) {
 	session_start();
 	$F_ID = $_POST["F_ID"];
@@ -340,10 +340,10 @@ if( isset($_POST["cardcode"]) ) {
 		";
 		$res = mysqli_query( $mysqli, $query );
 
-		$_SESSION["success"][] = "Карта подтверждена.";
+		$_SESSION["success"][] = "Выдача подтверждена.";
 	}
 	else {
-		$_SESSION["error"][] = "Карта не подтверждена.";
+		$_SESSION["error"][] = "Выдача не подтверждена.";
 	}
 
 	// Перенаправление в табель
@@ -626,6 +626,7 @@ if( isset($_POST["cardcode"]) ) {
 			$.ajax({ url: "/ajax/salary_payment_form_ajax.php?cardcode="+cardcode+"&F_ID=<?=$F_ID?>", dataType: "script", async: false });
 
 			$('#salary_payment_form').dialog({
+				title: 'Выдача заработной платы',
 				resizable: false,
 				width: 1000,
 				modal: true,
