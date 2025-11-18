@@ -162,7 +162,7 @@ foreach ($_GET as &$value) {
 		JOIN list__Batch LB ON LB.PB_ID = PB.PB_ID
 		JOIN list__BatchMaterial LBM ON LBM.LB_ID = LB.LB_ID
 		JOIN material__Name MN ON MN.MN_ID = LBM.MN_ID
-		WHERE LBM.quantity
+		WHERE LBM.quantity > 0
 			AND PB.F_ID = {$_GET["F_ID"]}
 			".($_GET["date_from"] ? "AND LB.batch_date >= '{$_GET["date_from"]}'" : "")."
 			".($_GET["date_to"] ? "AND LB.batch_date <= '{$_GET["date_to"]}'" : "")."
