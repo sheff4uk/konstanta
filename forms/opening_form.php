@@ -14,14 +14,14 @@ if( isset($_POST["LO_ID"]) ) {
 
 	if( $_POST["LO_ID"] ) { // Редактируем
 		$query = "
-			UPDATE list__Opening
+			UPDATE list__Opening_def
 			SET not_spill = {$not_spill}
 				,crack = {$crack}
 				,crack_drying = {$crack_drying}
 				,chipped = {$chipped}
 				,def_form = {$def_form}
 				,def_assembly = {$def_assembly}
-				,reject = {$relect}
+				,reject = {$reject}
 			WHERE LO_ID = {$_POST["LO_ID"]}
 		";
 		if( !mysqli_query( $mysqli, $query ) ) {
@@ -34,23 +34,8 @@ if( isset($_POST["LO_ID"]) ) {
 		$_SESSION["success"][] = "Запись успешно отредактирована.";
 	}
 
-	if( $LO_ID ) {
-		// Получаем неделю
-		$query = "
-			SELECT YEARWEEK(opening_time, 1) week
-			FROM list__Opening
-			WHERE LO_ID = {$LO_ID}
-		";
-		$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
-		$row = mysqli_fetch_array($res);
-		$week = $row["week"];
-
-		// Перенаправление в журнал маршрутных листов
-		exit ('<meta http-equiv="refresh" content="0; url=/opening.php?week='.$week.'#'.$LO_ID.'">');
-	}
-	else {
-		exit ('<meta http-equiv="refresh" content="0; url=/opening.php">');
-	}
+	// Перенаправление на экран расформовки
+	exit ('<meta http-equiv="refresh" content="0; url=/opening.php?F_ID='.$_POST["F_ID"].'&week='.$_POST["week"].'#'.$LO_ID.'">');
 }
 ?>
 
@@ -65,6 +50,8 @@ if( isset($_POST["LO_ID"]) ) {
 	<form method='post' action="/forms/opening_form.php" onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
 		<fieldset>
 			<input type="hidden" name="LO_ID">
+			<input type="hidden" name="F_ID" value="<?=$_GET["F_ID"]?>">
+			<input type="hidden" name="week" value="<?=$_GET["week"]?>">
 			<div class="nowrap" style="display: inline-block; margin-bottom: 10px; margin-right: 30px;">
 				<span>Дата расформовки:</span>
 				<span id="o_date" style="font-size: 1.5em;"></span>
@@ -88,13 +75,13 @@ if( isset($_POST["LO_ID"]) ) {
 					<tr>
 						<td><b class="cassette" id="cassette"></b></td>
 						<td><span id="o_time"></span></td>
-						<td><input type="number" name="not_spill" min="0" style="width: 70px;"></td>
-						<td><input type="number" name="crack" min="0" style="width: 70px;"></td>
-						<td><input type="number" name="crack_drying" min="0" style="width: 70px;"></td>
-						<td><input type="number" name="chipped" min="0" style="width: 70px;"></td>
-						<td><input type="number" name="def_form" min="0" style="width: 70px;"></td>
-						<td><input type="number" name="def_assembly" min="0" style="width: 70px;"></td>
-						<td><input type="number" name="reject" min="0" style="width: 70px;"></td>
+						<td><input type="number" name="not_spill" min="0" max="100" style="width: 70px;"></td>
+						<td><input type="number" name="crack" min="0" max="100" style="width: 70px;"></td>
+						<td><input type="number" name="crack_drying" min="0" max="100" style="width: 70px;"></td>
+						<td><input type="number" name="chipped" min="0" max="100" style="width: 70px;"></td>
+						<td><input type="number" name="def_form" min="0" max="100" style="width: 70px;"></td>
+						<td><input type="number" name="def_assembly" min="0" max="100" style="width: 70px;"></td>
+						<td><input type="number" name="reject" min="0" max="100" style="width: 70px;"></td>
 					</tr>
 				</tbody>
 			</table>
@@ -111,7 +98,7 @@ if( isset($_POST["LO_ID"]) ) {
 		<fieldset>
 			<!--Содержимое формы аяксом-->
 		</fieldset>
-<!--
+<!-- 
 		<div>
 			<hr>
 			<input type='submit' name="subbut" value='Записать' style='float: right;'>

@@ -13,7 +13,9 @@ include "./forms/opening_form.php";
 
 // Если в фильтре не установлена неделя, показываем текущую
 if( !$_GET["week"] ) {
-	$query = "SELECT YEARWEEK(CURDATE(), 1) week";
+	$query = "
+		SELECT YEARWEEK(CURDATE(), 1) week
+	";
 	$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 	$row = mysqli_fetch_array($res);
 	$_GET["week"] = $row["week"];
@@ -313,7 +315,7 @@ foreach ($_GET as &$value) {
 			<th rowspan="2">Куб раствора, г</th>
 			<th rowspan="2">Противовес</th>
 			<th rowspan="2">Дата заливки</th>
-<!--			<th rowspan="2"></th>-->
+			<th rowspan="2"></th>
 		</tr>
 		<tr>
 			<th>Дата</th>
@@ -430,11 +432,11 @@ while( $row = mysqli_fetch_array($res) ) {
 		<td class="bg-gray"><?=number_format($row["mix_density"], 0, ',', '&nbsp;')?><?=($row["mix_diff"] ? "<font class='diff_alert'>".($row["mix_diff"] > 0 ? " +" : " ").number_format($row["mix_diff"], 0, ',', '&nbsp;')."</font>" : "")?></td>
 		<td class="bg-gray"><?=$row["item"]?></td>
 		<td class="bg-gray"><a href="filling.php?F_ID=<?=$_GET["F_ID"]?>&week=<?=$row["lb_week"]?>#<?=$row["LB_ID"]?>" title="Заливка" target="_blank"><?=$row["batch_date_format"]?></a></td>
-<!--
+
 		<td>
 			<a href="#" class="add_opening" LO_ID="<?=$row["LO_ID"]?>" title="Изменить данные расформовки"><i class="fa fa-pencil-alt fa-lg"></i></a>
 		</td>
--->
+
 	</tr>
 	<?php
 	$o_date = $row["o_date"];
@@ -446,7 +448,7 @@ if( $in_cassette ) {
 		<tr style='background: #333 !important; color: #fff;'>\n
 			<td colspan='6'></td>\n
 			<td style='line-height: 5px;'><b>{$in_cassette} / {$cnt_weight}</b></td>\n
-			<td colspan='4'></td>\n
+			<td colspan='5'></td>\n
 		</tr>\n
 	";
 }
@@ -457,7 +459,7 @@ if( $in_cassette_total ) {
 		<tr class='total'>\n
 			<td colspan='6'></td>\n
 			<td><b>{$in_cassette_total} / {$cnt_weight_total}</b></td>\n
-			<td colspan='4'></td>\n
+			<td colspan='5'></td>\n
 		</tr>\n
 	";
 }
