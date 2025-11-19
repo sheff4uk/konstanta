@@ -399,7 +399,7 @@ while( $row = mysqli_fetch_array($res) ) {
 			<tr style='background: #333 !important; color: #fff;'>\n
 				<td colspan='6'></td>\n
 				<td style='line-height: 5px;'><b>{$in_cassette} / {$cnt_weight}</b></td>\n
-				<td colspan='4'></td>\n
+				<td colspan='5'></td>\n
 			</tr>\n
 		";
 		$in_cassette = 0;
