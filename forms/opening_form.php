@@ -14,15 +14,23 @@ if( isset($_POST["LO_ID"]) ) {
 
 	if( $_POST["LO_ID"] ) { // Редактируем
 		$query = "
-			UPDATE list__Opening_def
-			SET not_spill = {$not_spill}
+			INSERT INTO list__Opening_def
+			SET LO_ID = {$_POST["LO_ID"]}
+				,not_spill = {$not_spill}
 				,crack = {$crack}
 				,crack_drying = {$crack_drying}
 				,chipped = {$chipped}
 				,def_form = {$def_form}
 				,def_assembly = {$def_assembly}
 				,reject = {$reject}
-			WHERE LO_ID = {$_POST["LO_ID"]}
+			ON DUPLICATE KEY UPDATE
+				not_spill = {$not_spill}
+				,crack = {$crack}
+				,crack_drying = {$crack_drying}
+				,chipped = {$chipped}
+				,def_form = {$def_form}
+				,def_assembly = {$def_assembly}
+				,reject = {$reject}
 		";
 		if( !mysqli_query( $mysqli, $query ) ) {
 			$_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
