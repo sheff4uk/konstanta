@@ -190,7 +190,18 @@ if( isset($_POST["cardcode"]) ) {
 					TS_ID = LAST_INSERT_ID(TS_ID)
 			";
 			mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
-			$TS_ID = mysqli_insert_id( $mysqli );
+
+			// Узнаем TS_ID
+			$query = "
+				SELECT TS_ID
+				FROM Timesheet
+				WHERE ts_date = '{$ts_date}'
+					AND USR_ID = {$USR_ID}
+					AND F_ID = {$F_ID}
+			";
+			$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+			$row = mysqli_fetch_array($res);
+			$TS_ID = $row["TS_ID"];
 
 			// Добавляем запись номера смены
 			$query = "
