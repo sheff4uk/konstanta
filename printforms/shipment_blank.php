@@ -13,7 +13,7 @@ include "../config.php";
 
 <?php
 $PS_ID = $_GET["PS_ID"];
-echo "<title>Накладная №{$PS_ID}</title>";
+echo "<title>Накладная на отгрузку</title>";
 ?>
 	<style>
 		@media print {
@@ -64,6 +64,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
             + (SELECT IFNULL(SUM(1), 0) FROM plan__Shipment WHERE PS_ID <= PS.PS_ID AND F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NULL)) priority
             ,F.job_title_1
             ,F.full_name_1
+            ,IFNULL(PS.invoice_number, PS.PS_ID) invoice_number
         FROM plan__Shipment PS
         JOIN factory F ON F.F_ID = PS.F_ID
         WHERE PS.PS_ID = {$PS_ID}
@@ -74,6 +75,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
     $priority = $row["priority"];
     $job_title_1 = $row["job_title_1"];
     $full_name_1 = $row["full_name_1"];
+    $invoice_number = $row["invoice_number"];
 
     // Цикл по списку грузоотправителей
     $query = "
@@ -110,7 +112,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
         $statics = "
             <p style='font-size: 1.1em; float: left; margin: 0px;'>Грузоотправитель: <span style='text-decoration: underline;'>{$M_company}</span></p>\n
             <p style='text-align: right;'>от {$ps_date_format} г.</p>\n
-            <p style='text-align: center; font-size: 1.3em;'><b style='text-decoration: underline;'>Накладная №{$PS_ID} / {$priority}</b></p>\n
+            <p style='text-align: center; font-size: 1.3em;'><b style='text-decoration: underline;'>Накладная №{$invoice_number} / {$priority}</b></p>\n
             <!--<p style='font-size: 1.1em;'>Грузоотправитель: <span style='text-decoration: underline;'>{$M_company}</span></p>\n-->
             <table>\n
                 <thead>\n
@@ -206,7 +208,7 @@ echo "<title>Накладная №{$PS_ID}</title>";
             echo "
                 <div class='page'>
                     <div style='border-bottom: 2px solid; width: 100%;'>
-                        <p style='text-align: left; font-size: 1.3em;'><b>Расходная накладная №{$PS_ID} от {$ps_date_format} г.</b></p>
+                        <p style='text-align: left; font-size: 1.3em;'><b>Расходная накладная №{$invoice_number} от {$ps_date_format} г.</b></p>
                     </div>
                     <p style='text-align: left;'>Поставщик: <b>{$M_company}</b></p>
                     <p style='text-align: left;'>Покупатель: <b>{$CB_company}</b></p>

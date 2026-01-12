@@ -168,6 +168,7 @@ while( $row = mysqli_fetch_array($res) ) {
 			,IFNULL(PS.prior, (SELECT IFNULL(MAX(prior), 0) FROM plan__Shipment WHERE F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NOT NULL)
     		+ (SELECT IFNULL(SUM(1), 0) FROM plan__Shipment WHERE PS_ID <= PS.PS_ID AND F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NULL)) priority
 			,DATE_FORMAT(PS.shipment_time, '%d.%m.%Y %H:%i') friendly_shipment_time
+			,IFNULL(PS.invoice_number, PS.PS_ID) invoice_number
 		FROM plan__Shipment PS
 		JOIN plan__ShipmentCWP PSC ON PSC.PS_ID = PS.PS_ID
 		WHERE PS.ps_date = '{$row["ps_date"]}'
@@ -223,7 +224,7 @@ while( $row = mysqli_fetch_array($res) ) {
 			if( $priority != $subrow["priority"] ) {
 				echo "<td rowspan='{$subcnt}'>";
 				if( $subrow["friendly_shipment_time"] ) {
-				 	echo "{$subrow["friendly_shipment_time"]}<br><b>Накладная №{$subrow["PS_ID"]} / {$subrow["priority"]}</b>";
+				 	echo "{$subrow["friendly_shipment_time"]}<br><b>Накладная №{$subrow["invoice_number"]} / {$subrow["priority"]}</b>";
 				}
 				echo "</td>";
 				echo "<td rowspan='{$subcnt}'>";

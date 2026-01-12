@@ -49,6 +49,7 @@ if( isset($_POST["lpp_id"]) ) {
 		SELECT PS.prior
 			,(SELECT IFNULL(MAX(prior), 0) FROM plan__Shipment WHERE F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NOT NULL)
 			+ (SELECT IFNULL(SUM(1), 0) FROM plan__Shipment WHERE PS_ID <= PS.PS_ID AND F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NULL) priority
+			,YEAR(PS.ps_date) `year`
 		FROM plan__Shipment PS
 		WHERE PS.PS_ID = {$_POST["ps_id"]}
 	";
@@ -56,6 +57,7 @@ if( isset($_POST["lpp_id"]) ) {
 	$row = mysqli_fetch_array($res);
 	$prior = $row["prior"];
 	$priority = $row["priority"];
+	$year = $row["year"];
 	
 	// Если отгрузки не было
 	if( $prior == null ) {
@@ -72,10 +74,21 @@ if( isset($_POST["lpp_id"]) ) {
 		$row = mysqli_fetch_array($res);
 		$now = $row["now"];
 
+		// Номер очередной накладной
+		$query = "
+			SELECT IFNULL(MAX(PS.invoice_number), 0) + 1 `invoice_number`
+			FROM plan__Shipment PS
+			WHERE YEAR(PS.ps_date) = {$year}
+		";
+		$res = mysqli_query( $mysqli, $query ) or die("Invalid query1: " .mysqli_error( $mysqli ));
+		$row = mysqli_fetch_array($res);
+		$invoice_number = $row["invoice_number"];
+
 		$query = "
 			UPDATE plan__Shipment
 			SET shipment_time = '{$now}'
 				,prior = {$priority}
+				,invoice_number = {$invoice_number}
 			WHERE PS_ID = {$_POST["ps_id"]}
 		";
 		mysqli_query( $mysqli, $query ) or die("Invalid query2: " .mysqli_error( $mysqli ));
@@ -91,7 +104,7 @@ if( isset($_POST["lpp_id"]) ) {
 		if( mysqli_affected_rows($mysqli) ) {
 			// Сообщение в телеграм об отгрузке машины
 			//$message = "🚛";
-			$message = "Накладная №{$_POST["ps_id"]} / {$priority}";
+			$message = "Накладная №{$invoice_number} / {$priority}";
 			$query = "
 				SELECT CONCAT(IFNULL(CW.item, CWP.cwp_name), ' (', CWP.in_pallet, 'шт)') item
 					,SUM(1) cnt
