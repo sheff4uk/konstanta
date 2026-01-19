@@ -9,12 +9,27 @@ if( isset($_POST["ps_date"]) ) {
 	if( $_POST["PS_ID"] ) {
 		$PS_ID = $_POST["PS_ID"];
 
+		// Проверяем не идет ли сейчас отгрузка
 		$query = "
-			UPDATE plan__Shipment
-			SET ps_date = '{$_POST["ps_date"]}'
-			WHERE PS_ID = {$PS_ID}
+			SELECT PS.prior
+			FROM plan__Shipment PS
+			WHERE PS.PS_ID = {$PS_ID}
 		";
-		if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
+		$res = mysqli_query( $mysqli, $query );
+		$row = mysqli_fetch_array($res);
+		$prior = $row["prior"];
+
+		if( $prior == null ) {
+			$query = "
+				UPDATE plan__Shipment
+				SET ps_date = '{$_POST["ps_date"]}'
+				WHERE PS_ID = {$PS_ID}
+			";
+			if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
+		}
+		else {
+			$_SESSION["error"][] = "Идет отшрузка. Редактирование плана запрещено.";
+		}
 	}
 	// Если новый план, делаем запись в plan__Shipment
 	else {
@@ -27,27 +42,29 @@ if( isset($_POST["ps_date"]) ) {
 		$PS_ID = mysqli_insert_id( $mysqli );
 	}
 
-	foreach ($_POST["CWP_ID"] as $key => $value) {
-		// Редактируем
-		if( $_POST["cur_quantity"][$key] or $_POST["cur_quantity"][$key] == "0" ) {
-			$quantity = ($_POST["quantity"][$key] == "") ? 0 : $_POST["quantity"][$key];
-			$query = "
-				UPDATE plan__ShipmentCWP
-				SET quantity = {$quantity}
-					,author = {$_SESSION['id']}
-				WHERE PS_ID = {$PS_ID} AND CWP_ID = {$value}
-			";
-			if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
-		}
-		elseif( $_POST["quantity"][$key] > 0 ) {
-			$query = "
-				INSERT INTO plan__ShipmentCWP
-				SET PS_ID = {$PS_ID}
-					,CWP_ID = {$value}
-					,quantity = {$_POST["quantity"][$key]}
-					,author = {$_SESSION['id']}
-			";
-			if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
+	if( !isset($_SESSION["error"]) ) {
+		foreach ($_POST["CWP_ID"] as $key => $value) {
+			// Редактируем
+			if( $_POST["cur_quantity"][$key] or $_POST["cur_quantity"][$key] == "0" ) {
+				$quantity = ($_POST["quantity"][$key] == "") ? 0 : $_POST["quantity"][$key];
+				$query = "
+					UPDATE plan__ShipmentCWP
+					SET quantity = {$quantity}
+						,author = {$_SESSION['id']}
+					WHERE PS_ID = {$PS_ID} AND CWP_ID = {$value}
+				";
+				if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
+			}
+			elseif( $_POST["quantity"][$key] > 0 ) {
+				$query = "
+					INSERT INTO plan__ShipmentCWP
+					SET PS_ID = {$PS_ID}
+						,CWP_ID = {$value}
+						,quantity = {$_POST["quantity"][$key]}
+						,author = {$_SESSION['id']}
+				";
+				if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
+			}
 		}
 	}
 

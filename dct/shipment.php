@@ -44,23 +44,22 @@ if( isset($_POST["WT_ID"]) ) {
 
 //Отгрузка машины
 if( isset($_POST["lpp_id"]) ) {
-	// Узнаем приоритет чтобы сохранить его
+	// Узнаем дату отгрузки
 	$query = "
-		SELECT PS.prior
-			,(SELECT IFNULL(MAX(prior), 0) FROM plan__Shipment WHERE F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NOT NULL)
-			+ (SELECT IFNULL(SUM(1), 0) FROM plan__Shipment WHERE PS_ID <= PS.PS_ID AND F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NULL) priority
-			,YEAR(PS.ps_date) `year`
+		SELECT PS.shipment_time
+			,PS.prior
+			,PS.invoice_number
 		FROM plan__Shipment PS
 		WHERE PS.PS_ID = {$_POST["ps_id"]}
 	";
 	$res = mysqli_query( $mysqli, $query ) or die("Invalid query1: " .mysqli_error( $mysqli ));
 	$row = mysqli_fetch_array($res);
-	$prior = $row["prior"];
-	$priority = $row["priority"];
-	$year = $row["year"];
+	$shipment_time = $row["shipment_time"];
+	$priority = $row["prior"];
+	$invoice_number = $row["invoice_number"];
 	
 	// Если отгрузки не было
-	if( $prior == null ) {
+	if( $shipment_time == null ) {
 		$LPP_IDs = "0";
 		foreach ($_POST["lpp_id"] as $key => $value) {
 			$LPP_IDs .= ",{$value}";
@@ -74,21 +73,9 @@ if( isset($_POST["lpp_id"]) ) {
 		$row = mysqli_fetch_array($res);
 		$now = $row["now"];
 
-		// Номер очередной накладной
-		$query = "
-			SELECT IFNULL(MAX(PS.invoice_number), 0) + 1 `invoice_number`
-			FROM plan__Shipment PS
-			WHERE YEAR(PS.ps_date) = {$year}
-		";
-		$res = mysqli_query( $mysqli, $query ) or die("Invalid query1: " .mysqli_error( $mysqli ));
-		$row = mysqli_fetch_array($res);
-		$invoice_number = $row["invoice_number"];
-
 		$query = "
 			UPDATE plan__Shipment
 			SET shipment_time = '{$now}'
-				,prior = {$priority}
-				,invoice_number = {$invoice_number}
 			WHERE PS_ID = {$_POST["ps_id"]}
 		";
 		mysqli_query( $mysqli, $query ) or die("Invalid query2: " .mysqli_error( $mysqli ));
@@ -415,12 +402,56 @@ include "header.php";
 			// }
 
 			if( $validation == 1 ) {
+				// Узнаем год и приоритет
+				$query = "
+					SELECT PS.prior
+						,(SELECT IFNULL(MAX(prior), 0) FROM plan__Shipment WHERE F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NOT NULL)
+						+ (SELECT IFNULL(SUM(1), 0) FROM plan__Shipment WHERE PS_ID <= PS.PS_ID AND F_ID = PS.F_ID AND ps_date = PS.ps_date AND shipment_time IS NULL) priority
+						,YEAR(PS.ps_date) `year`
+					FROM plan__Shipment PS
+					WHERE PS.PS_ID = {$PS_ID}
+				";
+				$res = mysqli_query( $mysqli, $query ) or die("Invalid query1: " .mysqli_error( $mysqli ));
+				$row = mysqli_fetch_array($res);
+				$prior = $row["prior"];
+				$priority = $row["priority"];
+				$year = $row["year"];
+
+				if( $prior == null ) {
+					// Присваиваем накладной номер
+					$query = "
+						SELECT IFNULL(MAX(PS.invoice_number), 0) + 1 `invoice_number`
+						FROM plan__Shipment PS
+						WHERE YEAR(PS.ps_date) = {$year}
+					";
+					$res = mysqli_query( $mysqli, $query ) or die("Invalid query1: " .mysqli_error( $mysqli ));
+					$row = mysqli_fetch_array($res);
+					$invoice_number = $row["invoice_number"];
+
+					$query = "
+						UPDATE plan__Shipment
+						SET prior = {$priority}
+							,invoice_number = {$invoice_number}
+						WHERE PS_ID = {$PS_ID}
+					";
+					mysqli_query( $mysqli, $query ) or die("Invalid query2: " .mysqli_error( $mysqli ));
+				}
+
 				echo "<br><input type='hidden' name='ps_id' value='{$PS_ID}'>\n";
 				if( $F_ID == 2 ) {
 					echo "<a href='../printforms/shipment_blank.php?PS_ID={$PS_ID}' class='print' style='font-size: 1.5em;'><i class='fas fa-print fa-lg'></i> Накладная</a>\n";
 				}
 				echo "<input type='submit' value='Отгрузить' style='background-color: red; font-size: 2em; color: white;'>\n";
 				echo "<br><br><font color='red'>ВНИМАНИЕ! Отменить это действие не возможно.</font>\n";
+			}
+			else {
+				$query = "
+					UPDATE plan__Shipment
+					SET prior = NULL
+						,invoice_number = NULL
+					WHERE PS_ID = {$PS_ID}
+				";
+				mysqli_query( $mysqli, $query ) or die("Invalid query2: " .mysqli_error( $mysqli ));
 			}
 		}
 		echo "</form>\n";
