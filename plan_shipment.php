@@ -229,8 +229,10 @@ while( $row = mysqli_fetch_array($res) ) {
 				}
 				echo "</td>";
 				echo "<td rowspan='{$subcnt}'>";
-				echo "<a href='printforms/shipment_blank.php?PS_ID={$subrow["PS_ID"]}' class='print' style='margin-right: 20px;' title='Бланк накладной'><i class='fas fa-print fa-lg'></i></a>";
-				if( !$subrow["prior"] ) {
+				if( $subrow["prior"] ) {
+					echo "<a href='printforms/shipment_blank.php?PS_ID={$subrow["PS_ID"]}' class='print' style='margin-right: 20px;' title='Бланк накладной'><i class='fas fa-print fa-lg'></i></a>";
+				}
+				else {
 					echo "<a href='#' class='add_ps' ps_id='{$subrow["PS_ID"]}' ps_date='{$row["ps_date"]}' priority='{$subrow["priority"]}' title='Изменить запланированную отгрузку'><i class='fa fa-pencil-alt fa-lg'></i></a>";
 				}
 				echo "</td>";
