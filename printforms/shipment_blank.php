@@ -203,8 +203,8 @@ echo "<title>Накладная на отгрузку</title>";
             </div>\n
         ";
 
-        // Накладная на паллеты BEKO
-        if( $CB_ID == 3 ) {
+        // Накладная на паллеты BEKO, Indesit
+        if( $CB_ID == 3 || $CB_ID == 4 ) {
             echo "
                 <div class='page'>
                     <div style='border-bottom: 2px solid; width: 100%;'>
@@ -228,7 +228,7 @@ echo "<title>Накладная на отгрузку</title>";
                             <tr>
                                 <td style='text-align: center;'>1</td>
                                 <td></td>
-                                <td>Паллет для противовесов 4698020079</td>
+                                <td>".(($CB_ID == 3) ? 'Паллет для противовесов 4698020079' : 'Паллет деревянный 800x1200')."</td>
                                 <td style='width: 30px;'></td>
                                 <td>шт</td>
                                 <td style='text-align: right;'>{$quantity}</td>
