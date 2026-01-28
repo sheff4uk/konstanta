@@ -137,6 +137,7 @@ echo "<title>Накладная на отгрузку</title>";
                 AND CWP.M_ID = {$M_ID}
             LEFT JOIN CounterWeight CW ON CW.CW_ID = CWP.CW_ID
             WHERE PSC.PS_ID = {$PS_ID}
+                AND PSC.quantity > 0
         ";
         $subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
         $i = 1;
