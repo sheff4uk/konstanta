@@ -688,12 +688,12 @@ foreach ($_GET as &$value) {
 		}
 
 		// Итог снизу
-		echo "<tr><td colspan='2' style='text-align: center; font-size: 1.0em; background: #3333;'>";
+		echo "<tr><td colspan='2' class='nowrap' style='text-align: center; font-size: 1.0em; background: #3333;'><span>";
 		foreach ($user_type as $key => $value) {
-			echo "<b>{$key}:&nbsp;{$value}</b><br>";
+			echo "<b>{$key}: {$value}</b><br>";
 		}
-		echo "<b>Итого:&nbsp;{$usr_cnt}</b>";
-		echo "</td>";
+		echo "<b>Итого: {$usr_cnt}</b>";
+		echo "</span></td>";
 		echo "<td colspan='2' class='nowrap' style='text-align: center; background: #3333;'><span><b>с</b> смена<br><b>ч</b> час-смена(от начала смены до регистрации выхода)<br><b>ч+</b> час-вход(от регистрации входа до регистрации выхода)<br><b>м</b> месяц(начисление происходит только в рабочие дни)</span></td>";
 
 		$i = 1;
