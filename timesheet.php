@@ -688,7 +688,7 @@ foreach ($_GET as &$value) {
 		}
 
 		// Итог снизу
-		echo "<tr><td colspan='2' class='nowrap' style='text-align: center; font-size: 1.0em; background: #3333;'><span>";
+		echo "<tr><td colspan='2' class='nowrap' style='text-align: left; font-size: 1.0em; background: #3333;'><span>";
 		foreach ($user_type as $key => $value) {
 			echo "<b>{$key}: {$value}</b><br>";
 		}
