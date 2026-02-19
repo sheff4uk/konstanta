@@ -382,6 +382,7 @@ foreach ($_GET as &$value) {
 				}
 			?>
 
+			<!-- <th>Долг</th> -->
 			<th colspan="2">[1...15]</th>
 			<th colspan="2">[16...<?=$days?>]</th>
 			<th colspan="2" style="font-size: 1.5em;">Σ</th>
@@ -418,10 +419,14 @@ foreach ($_GET as &$value) {
 				,TST.valid_from
 				,TST.tariff
 				,TST.type
+				,IFNULL(TM.income1, 0) income1
+				,IFNULL(TM.income2, 0) income2
 				,IFNULL(TM.salary1, 0) salary1
 				,IFNULL(TM.salary2, 0) salary2
 				,IFNULL(TM.cash1, 0) cash1
 				,IFNULL(TM.cash2, 0) cash2
+				,USR.act
+				,IFNULL(USR.user_type, 'Без кат.') user_type
 			FROM Users USR
 			JOIN TariffMonth TM ON TM.year = {$year}
 				AND TM.month = {$month}
@@ -434,8 +439,21 @@ foreach ($_GET as &$value) {
 				".(($user_type != '') ? "AND USR.user_type LIKE '{$user_type}'" : "")."
 			ORDER BY Name
 		";
+		$user_type = array();
 		$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 		while( $row = mysqli_fetch_array($res) ) {
+
+			// Узнаем долг на начало месяца
+			$query = "
+				SELECT IFNULL(SUM(IF((IFNULL(income1, 0) - IFNULL(salary1, 0)) + (IFNULL(income2, 0) - IFNULL(salary2, 0)) < 0, ABS( (IFNULL(income1, 0) - IFNULL(salary1, 0)) + (IFNULL(income2, 0) - IFNULL(salary2, 0)) ), 0)), 0) debt
+				FROM TariffMonth
+				WHERE STR_TO_DATE(CONCAT_WS('-', `year`, `month`, 1), '%Y-%m-%d') < STR_TO_DATE(CONCAT_WS('-', {$year}, {$month}, 1), '%Y-%m-%d')
+					AND USR_ID = {$row["USR_ID"]}
+					AND F_ID = {$F_ID}
+			";
+			$subres = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
+			$subrow = mysqli_fetch_array($subres);
+			$debt = $subrow["debt"];
 
 			// Находим все актуальные тарифа для этого месяца
 			$query = "
@@ -621,28 +639,36 @@ foreach ($_GET as &$value) {
 				}
 				$i++;
 			}
-			$sigmapay = ( $sigmapay1 - $row["salary1"] ) + ( $sigmapay2 - $row["salary2"] );
+			//$sigmapay = ( $sigmapay1 - $row["salary1"] ) + ( $sigmapay2 - $row["salary2"] ) - $debt;
+			//$sigmapay1 = $sigmapay1 - $row["salary1"] - $debt;
 			$sigmapay1 = $sigmapay1 - $row["salary1"];
 			$sigmapay2 = $sigmapay2 - $row["salary2"] + ($sigmapay1 < 0 ? $sigmapay1 : 0) ;
+			$sigmapay = ($sigmapay1 > 0 ? $sigmapay1 : 0) + ($sigmapay2 > 0 ? $sigmapay2 : 0);
 
 			$total_salary1 += $row["salary1"];
 			$total_salary2 += $row["salary2"];
 			$total_sigmapay1 += ($sigmapay1 > 0 ? $sigmapay1 : 0);
 			$total_sigmapay2 += ($sigmapay2 > 0 ? $sigmapay2 : 0);
 			$total_sigmapay += ($sigmapay > 0 ? $sigmapay : 0);
+			$total_debt += $debt;
 
+			// echo "
+			// 	<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
+			// 		<n style='color: red;'>".($debt > 0 ? number_format($debt, 0, '', ' ') : null)."</n>
+			// 	</td>
+			// ";
 			echo "
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($row["salary1"], 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: ".($row["cash1"] ? '#0f03' : '#3333').";' class='txtright'>
-					<n>".(number_format($sigmapay1, 0, '', ' '))."</n>
+					<n".($sigmapay1 <= 0 ? " style='opacity: .5;'" : "").">".(number_format($sigmapay1, 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format($row["salary2"], 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: ".($row["cash2"] ? '#0f03' : '#3333').";' class='txtright'>
-					<n>".(number_format($sigmapay2, 0, '', ' '))."</n>
+					<n".($sigmapay2 <= 0 ? " style='opacity: .5;'" : "").">".(number_format($sigmapay2, 0, '', ' '))."</n>
 				</td>
 				<td style='overflow: visible; font-weight: bold; background: #3333;' class='txtright'>
 					<n>".(number_format(($row["salary1"] + $row["salary2"]), 0, '', ' '))."</n>
@@ -655,11 +681,19 @@ foreach ($_GET as &$value) {
 				</td>
 			";
 
-			$usr_cnt++;
+			if ($row["act"]) {
+				$user_type[$row["user_type"]]++;
+				$usr_cnt++;
+			}
 		}
 
 		// Итог снизу
-		echo "<tr><td colspan='2' style='text-align: center; font-size: 1.5em; background: #3333;'><b><i class='fa-solid fa-user'></i>x{$usr_cnt}</b></td>";
+		echo "<tr><td colspan='2' style='text-align: center; font-size: 1.0em; background: #3333;'>";
+		foreach ($user_type as $key => $value) {
+			echo "<b>{$key}:&nbsp;{$value}</b><br>";
+		}
+		echo "<b>Итого:&nbsp;{$usr_cnt}</b>";
+		echo "</td>";
 		echo "<td colspan='2' class='nowrap' style='text-align: center; background: #3333;'><span><b>с</b> смена<br><b>ч</b> час-смена(от начала смены до регистрации выхода)<br><b>ч+</b> час-вход(от регистрации входа до регистрации выхода)<br><b>м</b> месяц(начисление происходит только в рабочие дни)</span></td>";
 
 		$i = 1;
@@ -685,6 +719,11 @@ foreach ($_GET as &$value) {
 			echo "</td>";
 			$i++;
 		}
+		// echo "
+		// 	<td style='font-weight: bold; background: #3333;' class='txtright'>
+		// 		<n style='color: red;'>".($debt > 0 ? number_format($total_debt, 0, '', ' ') : null)."</n>
+		// 	</td>
+		// ";
 		echo "
 			<td style='font-weight: bold; background: #3333;' class='txtright'>
 				<n>".(number_format($total_salary1, 0, '', ' '))."</n>
