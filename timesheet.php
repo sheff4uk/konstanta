@@ -439,7 +439,7 @@ foreach ($_GET as &$value) {
 				".(($user_type != '') ? "AND USR.user_type LIKE '{$user_type}'" : "")."
 			ORDER BY Name
 		";
-		$user_type = array();
+		$user_type_array = array();
 		$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 		while( $row = mysqli_fetch_array($res) ) {
 
@@ -682,14 +682,14 @@ foreach ($_GET as &$value) {
 			";
 
 			if ($row["act"]) {
-				$user_type[$row["user_type"]]++;
+				$user_type_array[$row["user_type"]]++;
 				$usr_cnt++;
 			}
 		}
 
 		// Итог снизу
 		echo "<tr><td colspan='2' class='nowrap' style='text-align: left; font-size: 1.0em; background: #3333;'><span>";
-		foreach ($user_type as $key => $value) {
+		foreach ($user_type_array as $key => $value) {
 			echo "<b>{$key}: {$value}</b><br>";
 		}
 		echo "<b>Итого: {$usr_cnt}</b>";
