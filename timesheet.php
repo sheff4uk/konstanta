@@ -122,6 +122,57 @@ if( isset($_POST["mon"]) ) {
 	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'&user_type='.$user_type.'">');
 }
 
+// Расчет работника
+if( isset($_POST["payout"]) ) {
+	session_start();
+	$F_ID = $_POST["F_ID"];
+	$month = $_POST["month"];
+	$user_type = $_POST["user_type"];
+	$USR_ID = $_POST["USR_ID"];
+	$payout = $_POST["payout"] ? $_POST["payout"] : "NULL";
+
+	// Увольнение
+	$query = "
+		UPDATE Users
+		SET act = 0
+		WHERE USR_ID = {$USR_ID}
+	";
+	mysqli_query( $mysqli, $query );
+
+	// Расстановка меток УВ
+	$i = date('d');
+	$i++;
+	$curyear = date('Y');
+	$curmonth = date('m');
+	$lastday = date('t');
+	while ($i <= $lastday) {
+		$query = "
+			INSERT INTO Timesheet
+			SET ts_date = '{$curyear}-{$curmonth}-{$i}'
+				,USR_ID = {$USR_ID}
+				,F_ID = {$F_ID}
+				,status = 2
+			ON DUPLICATE KEY UPDATE
+				status = IFNULL(status, 2)
+		";
+		mysqli_query( $mysqli, $query );
+		$i++;
+	}
+
+	// Вычитание расчета в день увольнения
+	$query = "
+		UPDATE Timesheet
+		SET payout = {$payout}
+			,comment = 'Расчет при увольнении'
+		WHERE USR_ID = {$USR_ID}
+			AND F_ID = {$F_ID}
+			AND ts_date = CURDATE()
+	";
+	mysqli_query( $mysqli, $query );
+
+	// Перенаправление в табель
+	exit ('<meta http-equiv="refresh" content="0; url=/timesheet.php?F_ID='.$F_ID.'&month='.$month.'&user_type='.$user_type.'">');
+}
 
 ///////////////////////
 // Сохранение файлов //
@@ -677,6 +728,15 @@ foreach ($_GET as &$value) {
 					<n>".(number_format(($sigmapay), 0, '', ' '))."</n>
 				</td>
 				<td class='txtright'>
+			";
+			if ($row["act"]) {
+				$curyear = date('Y');
+				$curmonth = date('m');
+				if ($year == $curyear && $month == $curmonth) {
+					echo "<a href='#' class='fire' USR_ID='{$row["USR_ID"]}' USR_Name='{$row["Name"]}' payout='{$sigmapay}' title='Расчитать'><i class='fa-regular fa-handshake fa-lg'></i></a>";
+				}
+			}
+			echo "
 					<a href='#' class='salary_edit' USR_ID='{$row["USR_ID"]}' USR_Name='{$row["Name"]}' salary1='{$row["salary1"]}' salary2='{$row["salary2"]}' title='Редактировать'><i class='fa fa-pencil-alt fa-lg'></i></a>
 				</td>
 			";
@@ -858,6 +918,25 @@ foreach ($_GET as &$value) {
 	</form>
 </div>
 
+<div id='fire_form' class="addproduct" style='display:none;'>
+	<form method='post' onsubmit="JavaScript:this.subbut.disabled=true;this.subbut.value='Подождите, пожалуйста!';">
+		<fieldset>
+			<input type="hidden" name="F_ID" value="<?=$F_ID?>">
+			<input type="hidden" name="month" value="<?=$_GET["month"]?>">
+			<input type="hidden" name="user_type" value="<?=$user_type?>">
+			<input type="hidden" name="USR_ID">
+			<input type="hidden" name="payout">
+
+			<h3>Подтвердите увольнение.</h2>
+			<h3>Расчет: <span style="font-size: 1.5em;" id="payout"></span>р.</h3>
+		</fieldset>
+		<div>
+			<hr>
+			<input type='submit' name="subbut" value='Расчитать' style='float: right;'>
+		</div>
+	</form>
+</div>
+
 <script>
 	$(function(){
 		// Подсвечивание столбцов таблицы
@@ -959,6 +1038,31 @@ foreach ($_GET as &$value) {
 			$('#salary_form input[name="USR_ID"]').val(USR_ID);
 
 			$('#salary_form').dialog({
+				title: USR_Name,
+				resizable: false,
+				width: 600,
+				modal: true,
+				closeText: 'Закрыть'
+			});
+
+			return false;
+		});
+
+		// Расчет работника
+		$('.fire').click( function() {
+			// Проверяем сессию
+			$.ajax({ url: "check_session.php?script=1", dataType: "script", async: false });
+
+			var payout = $(this).attr('payout'),
+				USR_ID = $(this).attr('USR_ID'),
+				USR_Name = $(this).attr('USR_Name');
+
+			$('#fire_form input[name="payout"]').val(payout);
+			$('#fire_form input[name="USR_ID"]').val(USR_ID);
+			$('#fire_form #USR_Name').html(USR_Name);
+			$('#fire_form #payout').html(payout);
+
+			$('#fire_form').dialog({
 				title: USR_Name,
 				resizable: false,
 				width: 600,

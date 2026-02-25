@@ -183,9 +183,10 @@ if( isset($_POST["USR_ID"]) ) {
 		}
 	}
 
-	// Усли уволен, проставляем метки УВ
+	// Если уволен, проставляем метки УВ
 	if( $cardcode != '' and $act == 0 ) {
 		$i = date('d');
+		$i++;
 		$curyear = date('Y');
 		$curmonth = date('m');
 		$lastday = date('t');
@@ -230,7 +231,8 @@ if( isset($_POST["USR_ID"]) ) {
 	}
 
 	// Перенаправление
-	exit ('<meta http-equiv="refresh" content="0; url=/users.php#'.$USR_ID.'">');
+	//exit ('<meta http-equiv="refresh" content="0; url=/users.php#'.$USR_ID.'">');
+	header("Location: /users.php#{$USR_ID}"); exit();
 }
 
 $title = 'Пользователи';
