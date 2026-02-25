@@ -733,6 +733,8 @@ foreach ($_GET as &$value) {
 				$curyear = date('Y');
 				$curmonth = date('m');
 				if ($year == $curyear && $month == $curmonth) {
+					$sigmapay = $sigmapay1 + $sigmapay2;
+					$sigmapay = ($sigmapay > 0 ? $sigmapay : 0);
 					echo "<a href='#' class='fire' USR_ID='{$row["USR_ID"]}' USR_Name='{$row["Name"]}' payout='{$sigmapay}' title='Расчитать'><i class='fa-regular fa-handshake fa-lg'></i></a>";
 				}
 			}
