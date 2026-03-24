@@ -247,7 +247,12 @@ foreach ($_GET as &$value) {
 			$i = 0;
 			while( $subrow = mysqli_fetch_array($subres) ) {
 				echo "<td style='background: #{$subrow["color"]};'>".round($subrow["quantity"], 3)."</td>";
-				echo "<td style='background: #{$subrow["color"]};'>".round($subrow["quantity"] * 1000/$row["details"], 3)."</td>";
+				if ($row["details"] != 0) {
+					echo "<td style='background: #{$subrow["color"]};'>".round($subrow["quantity"] * 1000/$row["details"], 3)."</td>";
+				}
+				else {
+					echo "<td style='background: #{$subrow["color"]};'>—</td>";
+				}
 				$quantity[$i] += $subrow["quantity"];
 				$i++;
 			}
