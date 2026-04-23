@@ -26,7 +26,6 @@ $notification_group = $row["notification_group"];
 			AND PB.print_time + INTERVAL 24 hour < NOW()
 			AND PB.batches > 0
 			AND PB.fact_batches = 0
-			AND PB.F_ID = 1
 	";
 	$res = mysqli_query( $mysqli, $query ) or die("Invalid query: " .mysqli_error( $mysqli ));
 	$telegram_text = "";
