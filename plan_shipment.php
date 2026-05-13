@@ -229,7 +229,8 @@ while( $row = mysqli_fetch_array($res) ) {
 				}
 				echo "</td>";
 				echo "<td rowspan='{$subcnt}'>";
-				if( $subrow["prior"] ) {
+				// if( $subrow["prior"] ) {
+				if( $subrow["friendly_shipment_time"] ) {
 					echo "<a href='printforms/shipment_blank.php?PS_ID={$subrow["PS_ID"]}' class='print' style='margin-right: 20px;' title='Бланк накладной'><i class='fas fa-print fa-lg'></i></a>";
 				}
 				else {
