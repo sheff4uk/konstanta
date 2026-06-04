@@ -28,7 +28,7 @@ if( isset($_POST["ps_date"]) ) {
 			if( !mysqli_query( $mysqli, $query ) ) $_SESSION["error"][] = "Invalid query: ".mysqli_error( $mysqli );
 		}
 		else {
-			$_SESSION["error"][] = "Идет отшрузка. Редактирование плана запрещено.";
+			$_SESSION["error"][] = "Идет отгрузка. Редактирование плана запрещено.";
 		}
 	}
 	// Если новый план, делаем запись в plan__Shipment
