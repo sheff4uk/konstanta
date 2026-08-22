@@ -18,13 +18,28 @@ switch ($_GET["doc"]) {
 
 if ( $url != "" ) {
 	$data = http_build_query($_POST);
-	$headers = stream_context_create(array(
-		'http' => array(
-			'method' => 'POST',
-			'header' => array('Referer: ' . $url),
-			'content' => $data
-		)
-	));
+	// Счет с печатью или без
+	if( $_POST["stamped"] == 1 ) {
+		$headers = stream_context_create(array(
+			'http' => array(
+				'method' => 'POST',
+				'header' => array(
+					'Cookie: ' . $service_online,
+					'Referer: ' . $url
+				),
+				'content' => $data
+			)
+		));
+	}
+	else {
+		$headers = stream_context_create(array(
+			'http' => array(
+				'method' => 'POST',
+				'header' => array('Referer: ' . $url),
+				'content' => $data
+			)
+		));
+	}
 
 	$content = file_get_contents($url . 'blanc.php', false, $headers);
 
