@@ -17,14 +17,15 @@ switch ($_GET["doc"]) {
 }
 
 echo $_GET["doc"];
-echo $_GET["cookie"];
+echo $_POST["cookie"];
 die;
 
 if ( $url != "" ) {
 	$data = http_build_query($_POST);
 	// Счет с печатью или без
 	if( $_POST["stamped"] == 1 ) {
-		$service_online = $_GET["cookie"];
+		$service_online = $_POST["cookie"];
+		unset($_POST["cookie"]);
 		$headers = stream_context_create(array(
 			'http' => array(
 				'method' => 'POST',
