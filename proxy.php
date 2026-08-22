@@ -16,10 +16,6 @@ switch ($_GET["doc"]) {
         $url = "";
 }
 
-echo $_GET["doc"];
-echo $_POST["cookie"];
-die;
-
 if ( $url != "" ) {
 	$data = http_build_query($_POST);
 	// Счет с печатью или без
