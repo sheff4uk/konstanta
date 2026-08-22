@@ -21,12 +21,12 @@ if ( $url != "" ) {
 	$headers = stream_context_create(array(
 		'http' => array(
 			'method' => 'POST',
-			'header' => array('Referer: https://service-online.su/forms/auto/ttn/'),
+			'header' => array('Referer: ' . $url),
 			'content' => $data
 		)
 	));
 
-	$content = file_get_contents('https://service-online.su/forms/auto/ttn/blanc.php', false, $headers);
+	$content = file_get_contents($url . 'blanc.php', false, $headers);
 
 	// Извлечение пути к файлу из заголовков
 	if (isset($http_response_header)) {
