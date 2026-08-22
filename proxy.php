@@ -16,6 +16,7 @@ switch ($_GET["doc"]) {
         $url = "";
 }
 
+echo $_GET["doc"];
 echo $_GET["cookie"];
 die;
 
