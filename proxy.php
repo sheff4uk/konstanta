@@ -1,14 +1,32 @@
 <?php
-$data = http_build_query($_POST);
-$headers = stream_context_create(array(
-	'http' => array(
-		'method' => 'POST',
-		'header' => array('Referer: https://service-online.su/forms/auto/ttn/'),
-		'content' => $data
-	)
-));
+switch ($_GET["doc"]) {
+    case "waybill":
+		$url = "https://service-online.su/forms/auto/ttn/";
+        break;
+    case "upd":
+        $url = "https://service-online.su/forms/buh/upd/";
+        break;
+    case "schet":
+        $url = "https://service-online.su/forms/buh/schet/";
+        break;
+    case "doverennost":
+        $url = "https://service-online.su/forms/doverennost_TMC/";
+        break;
+    default:
+        $url = "";
+}
 
-$content = file_get_contents('https://service-online.su/forms/auto/ttn/blanc.php', false, $headers);
+if ( $url != "" ) {
+	$data = http_build_query($_POST);
+	$headers = stream_context_create(array(
+		'http' => array(
+			'method' => 'POST',
+			'header' => array('Referer: https://service-online.su/forms/auto/ttn/'),
+			'content' => $data
+		)
+	));
+
+	$content = file_get_contents('https://service-online.su/forms/auto/ttn/blanc.php', false, $headers);
 
 	// Извлечение пути к файлу из заголовков
 	if (isset($http_response_header)) {
@@ -27,9 +45,9 @@ $content = file_get_contents('https://service-online.su/forms/auto/ttn/blanc.php
 				// 4. Забираем нужный ключ
 				$file_path = $data['file'] ?? null;
 				
-				header('Content-Type: application/pdf');
 				echo file_get_contents('https://service-online.su'.$file_path, false, null);
 			}
 		}
 	}
+}
 ?>
